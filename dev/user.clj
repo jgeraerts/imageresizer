@@ -14,7 +14,8 @@
    [com.stuartsierra.component :as component]
    [net.umask.imageresizer.resizer :as resizer]
    [net.umask.imageresizer.memorystore :as memstore]
-   [net.umask.imageresizer.server :as imgserver])
+   [net.umask.imageresizer.server :as imgserver]
+   [net.umask.imageresizer.store :as store])
   (:use ring.middleware.params))
 
 (defn handler [req] {:status  200
@@ -23,11 +24,14 @@
 
 
 (defn create-test-system []
-
-  (component/system-map
-   :store (memstore/create-memstore)
-   :resizer (component/using  (resizer/create-resizer) [:store])
-   :server (imgserver/create-server (wrap-params handler))))
+  (let [mstore (memstore/create-memstore)
+        rose (io/input-stream (io/resource "rose.jpg"))]
+    (do
+      (store/store-write mstore "rose.jpg" rose))
+    (component/system-map
+     
+     :resizer (resizer/create-resizer "verysecret" mstore)
+     :server  (component/using  (imgserver/create-server) [:resizer]))))
 
 (def system
   "A Var containing an object representing the application under

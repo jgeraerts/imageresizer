@@ -2,13 +2,14 @@
   (:require [com.stuartsierra.component :as component]
             [netty.ring.adapter :as netty]))
 
-(defrecord Server [handler]
+(defrecord Server [resizer]
   component/Lifecycle
 
   (start [this]
-    (assoc this :server (netty/start-server handler {:port 8080})))
+    (print this)
+    (assoc this :server (netty/start-server (:handler (:resizer this)) {:port 8080})))
   (stop [this]
     ((:server this))))
 
-(defn create-server [handler]
-  (->Server handler))
+(defn create-server []
+  (map->Server {}))

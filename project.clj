@@ -11,6 +11,7 @@
                  [org.clojure/tools.cli "0.3.1"]
                  [com.stuartsierra/component "0.2.1"]
                  [ring "1.2.2"]
+                 [digest "1.4.4"]
                  ]
 
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.4"] [ring-mock "0.1.5"]]

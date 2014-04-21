@@ -1,15 +1,17 @@
 (ns net.umask.imageresizer.resizer
-  (:use [clojure.string :only [split join]])
-  (:require [clojure.edn :as edn]))
+  (:use [clojure.string :only [split join]]
+        net.umask.imageresizer.store)
+  (:require [clojure.edn :as edn]
+
+            [clojure.java.io :as io]
+            [net.umask.imageresizer.image :as img]
+            digest)
+  )
 
 (def ^:const ops [{:key :crop :re-value #"^([0-9]+)x([0-9]+)x([0-9]+)x([0-9]+)$" :keys [:x :y :width :height]}
                   {:key :rotate :re-value #"^([0-9]+)$" :keys [:angle]}
                   {:key :size :re-value #"^([0-9]+)x([0-9]+)$" :keys [:width :height]}
-                  {:key :size :re-value #"^([0-9]+)$" :keys [:targetsize]}])
-                  
-
-(defn create-resizer []
-  {})
+                  {:key :size :re-value #"^([0-9]+)$" :keys [:size]}])
 
 (defn- option-map [op key value]
   (if (= (name (:key op)) key)
@@ -44,3 +46,54 @@
     (-> request
         parse-url-request
         handler)))
+
+(defn- validate-checksum [secretkey uri]
+  (let [[empty checksum rest] (split uri #"/" 3)
+        computedchecksum (digest/md5 (str secretkey rest))]
+    (= checksum computedchecksum)))
+
+
+(defn- scale
+  [i {size :size width :width height :height}]
+  (cond
+   (not (nil? size))(img/scale i :size size)
+   (not (or (nil? width) (nil? height))) (img/scale i :width width :height height :fit :stretch)
+   :else i ))
+
+(defn- crop
+  [i {x :x y :y width :width height :height}]
+  (if (every? (comp not nil?) [x y width height])
+    (img/crop i x y width height)
+    i))
+
+(defn- transform [original options]
+  (let [bos (java.io.ByteArrayOutputStream.)]
+    (-> (img/read original)
+        (crop (:crop options))
+        (scale (:size options))
+        (img/write bos))
+    (.toByteArray bos)))
+
+(defn create-ring-handler [secretkey store]
+  (fn [request]
+    (let [uri (:uri request)
+          resizeroptions (:imageresizer request)
+          originalname (:original resizeroptions)
+          checksum (get-in request [:imageresizer :checksum])
+          checksumvalid? (validate-checksum secretkey uri)
+          original (store-read store originalname)]
+      (if (or (nil? original)
+              (not  checksumvalid?))
+        {:status 404
+         :content-type "text/plain"
+         :body (str uri " not valid")}
+        (let [transformedimage (transform original resizeroptions)]
+          (store-write store uri (io/input-stream transformedimage))
+          {:status 200
+           :content-type "image/jpeg"
+           :body (io/input-stream transformedimage)})))))
+
+(defn create-resizer [secretkey store]
+  {:store store
+   :secretkey secretkey
+   :handler (wrap-url-parser  (create-ring-handler secretkey store))})
