@@ -11,7 +11,23 @@
    [clojure.string :as str]
    [clojure.test :as test]
    [clojure.tools.namespace.repl :refer (refresh refresh-all)]
-   [net.umask.imageresizer]))
+   [com.stuartsierra.component :as component]
+   [net.umask.imageresizer.resizer :as resizer]
+   [net.umask.imageresizer.memorystore :as memstore]
+   [net.umask.imageresizer.server :as imgserver])
+  (:use ring.middleware.params))
+
+(defn handler [req] {:status  200
+                     :headers {"Content-Type" "text/html"}
+                     :body    (pr-str req)})
+
+
+(defn create-test-system []
+
+  (component/system-map
+   :store (memstore/create-memstore)
+   :resizer (component/using  (resizer/create-resizer) [:store])
+   :server (imgserver/create-server (wrap-params handler))))
 
 (def system
   "A Var containing an object representing the application under
@@ -22,21 +38,20 @@
   "Creates and initializes the system under development in the Var
   #'system."
   []
-  ;; TODO
+  (alter-var-root #'system (constantly (create-test-system)))
   )
 
 (defn start
   "Starts the system running, updates the Var #'system."
   []
-  ;; TODO
+  (alter-var-root #'system component/start)
   )
 
 (defn stop
   "Stops the system if it is currently running, updates the Var
   #'system."
   []
-  ;; TODO
-  )
+  (alter-var-root #'system (fn [s] (when s (component/stop s)))))
 
 (defn go
   "Initializes and starts the system running."
@@ -50,3 +65,5 @@
   []
   (stop)
   (refresh :after 'user/go))
+
+
