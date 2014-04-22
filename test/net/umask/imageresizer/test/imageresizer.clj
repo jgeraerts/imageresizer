@@ -13,9 +13,9 @@
                  :height 400 }
           :checksum "deadbeef"} "/deadbeef/size/300x400/filename.jpg"
          {:original "foo/bar/original.jpg"
-          :size {:targetsize 300}
+          :size {:size 300}
           :checksum "deadbeef"} "/deadbeef/size/300/foo/bar/original.jpg"
          {:original "foo/bar/original.jpg"
-          :size {:targetsize 300}
+          :size {:size 300}
           :rotate {:angle  30}
           :checksum "deadbeef"} "/deadbeef/rotate/30/size/300/foo/bar/original.jpg")))

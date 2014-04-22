@@ -2,11 +2,11 @@
   (:use [clojure.string :only [split join]]
         net.umask.imageresizer.store)
   (:require [clojure.edn :as edn]
-
             [clojure.java.io :as io]
             [net.umask.imageresizer.image :as img]
-            digest)
-  )
+            digest))
+
+(set! *warn-on-reflection* true)
 
 (def ^:const ops [{:key :crop :re-value #"^([0-9]+)x([0-9]+)x([0-9]+)x([0-9]+)$" :keys [:x :y :width :height]}
                   {:key :rotate :re-value #"^([0-9]+)$" :keys [:angle]}
@@ -57,7 +57,7 @@
   [i {size :size width :width height :height}]
   (cond
    (not (nil? size))(img/scale i :size size)
-   (not (or (nil? width) (nil? height))) (img/scale i :width width :height height :fit :stretch)
+   (not (or (nil? width) (nil? height))) (img/scale i :width width :height height :fit :crop)
    :else i ))
 
 (defn- crop
@@ -65,6 +65,12 @@
   (if (every? (comp not nil?) [x y width height])
     (img/crop i x y width height)
     i))
+
+(defn- rotate
+  [img {angle :angle}]
+  (if (not (nil? angle))
+    (img/rotate img angle)
+    img))
 
 (defn- transform [original options]
   (let [bos (java.io.ByteArrayOutputStream.)]

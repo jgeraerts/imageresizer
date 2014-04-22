@@ -3,7 +3,7 @@
   (:require [clojure.java.io :as io])
   (:import [org.imgscalr Scalr Scalr$Method Scalr$Mode]
            [java.awt Image]
-           [java.io OutputStream]
+           [java.io OutputStream InputStream]
            [java.awt.image RenderedImage BufferedImageOp]
            [javax.imageio ImageIO ImageWriter ImageWriteParam IIOImage]
            [javax.imageio.stream FileImageOutputStream]))
@@ -13,7 +13,7 @@
 (defn read
   "Reads a BufferedImage from source, something that can be turned into
   a file with clojure.java.io/file"
-  [source]
+  [^InputStream source]
   (ImageIO/read source))
 
 (defn write
@@ -44,6 +44,10 @@
   and height. Returns the cropped image and does not modify img itself."
   [img x y width height]
   (Scalr/crop img x y width height (make-array BufferedImageOp 0)))
+
+(defn rotate
+  [img angle]
+  (Scalr/rotate img angle (make-array BufferedImageOp 0)))
 
 (defn scale
   "Scales a BufferedImage and returns the result, also a BufferedImage. Leaves

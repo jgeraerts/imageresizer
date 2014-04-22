@@ -8,7 +8,11 @@
 (defrecord FileStore [basedir]
   Store
   (store-write [this name stream]
-    (io/copy stream (getfile (:basedir this) name)))
+    (let [f (getfile (:basedir this) name)
+          parent (.getParentFile f)
+          parent-exists? (.exists parent)]
+      (do  (if (not parent-exists?) (.mkdirs parent))
+           (io/copy stream (getfile (:basedir this) name)))))
 
   (store-read [this name]
     (io/input-stream (getfile (:basedir this) name))))
