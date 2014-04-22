@@ -5,7 +5,7 @@
 (defrecord S3Store [bucket cred]
   Store
   (store-write [this name stream]
-    (s3/put-object (:cret this) (:bucket this) name stream))
+    (s3/put-object (:cred this) (:bucket this) name stream))
   (store-read [this name]
     (s3/get-object (:cred this) (:bucket this) name)))
 
