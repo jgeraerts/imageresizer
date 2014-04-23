@@ -1,6 +1,7 @@
 (ns net.umask.imageresizer.resizer
   (:use [clojure.string :only [split join]]
-        net.umask.imageresizer.store)
+        net.umask.imageresizer.store
+        [clojure.tools.logging :only [info debug]])
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [net.umask.imageresizer.image :as img]
@@ -87,17 +88,18 @@
           originalname (:original resizeroptions)
           checksum (get-in request [:imageresizer :checksum])
           checksumvalid? (validate-checksum secretkey uri)
-          original (store-read store originalname)]
-      (if (or (nil? original)
-              (not  checksumvalid?))
-        {:status 404
-         :content-type "text/plain"
-         :body (str uri " not valid:" resizeroptions )}
+          original (if checksumvalid? (store-read store originalname))]
+      (if (nil? original)
+        (do
+          (info "image not found or checksum not valid for uri" uri)
+          {:status 404
+           :content-type "text/plain"
+           :body ""})
         (let [transformedimage (transform original resizeroptions)]
-          (store-write store uri (io/input-stream transformedimage))
-          {:status 200
-           :content-type "image/jpeg"
-           :body (io/input-stream transformedimage)})))))
+          (do  (store-write store uri (io/input-stream transformedimage))
+               {:status 200
+                :content-type "image/jpeg"
+                :body (io/input-stream transformedimage)}))))))
 
 (defn create-resizer [secretkey store]
   {:store store

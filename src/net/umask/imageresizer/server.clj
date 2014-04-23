@@ -15,7 +15,6 @@
   component/Lifecycle
 
   (start [this]
-    (print this)
     (assoc this :server (netty/start-server (vhost-handler (:vhost this)) (:nettyconfig this))))
   (stop [this]
     ((:server this))))
@@ -24,4 +23,4 @@
   ([]
      (map->Server {:nettyconfig {:port 8080}}))
   ([nettyconfig]
-     (map->Server {:nettyconfig nettyconfig})))
+     (map->Server {:nettyconfig nettyconfig}))  )

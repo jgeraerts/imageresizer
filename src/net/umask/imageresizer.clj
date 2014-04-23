@@ -6,7 +6,9 @@
   (:use [net.umask.imageresizer
          [config :only [load-config]]
          [server :only [create-server]]
-         ])
+         
+         ]
+        [clojure.tools.logging :only [info]])
   (:gen-class))
 
 (defn usage [options-summary]
@@ -31,6 +33,7 @@
   (System/exit status))
 
 (defn -main [& args]
+  (info "Starting image resizer...")
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
     ;; Handle help and error conditions
     (cond
@@ -43,4 +46,6 @@
       (do  (component/start
             (component/system-map
              :vhost vhosts
-             :server (component/using (create-server netty-config) [:vhost])))))))
+             :server (component/using (create-server netty-config) [:vhost])))
+           (info "Server started. Listening on port" (get-in netty-config [:port]))
+           nil))))
