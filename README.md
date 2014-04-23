@@ -1,32 +1,8 @@
-# net.umask/imageresizer
+[![Build Status](https://travis-ci.org/jgeraerts/imageresizer.svg?branch=master)](https://travis-ci.org/jgeraerts/imageresizer)
 
-TODO: Brief description
+# Image Resizer
 
-
-
-## Releases and Dependency Information
-
-* Releases are published to TODO_LINK
-
-* Latest stable release is TODO_LINK
-
-* All released versions TODO_LINK
-
-[Leiningen] dependency information:
-
-    [net.umask/imageresizer "0.1.0-SNAPSHOT"]
-
-[Maven] dependency information:
-
-    <dependency>
-      <groupId>net.umask</groupId>
-      <artifactId>imageresizer</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
-    </dependency>
-
-[Leiningen]: http://leiningen.org/
-[Maven]: http://maven.apache.org/
-
+Dynamic image resizing server
 
 
 ## Usage
@@ -43,6 +19,6 @@ TODO
 
 ## Copyright and License
 
-Copyright © 2014 TODO_INSERT_NAME
+Copyright © 2014 Jo Geraerts
 
-TODO: [Choose a license](http://choosealicense.com/)
+[Eclipse Public License](http://www.eclipse.org/legal/epl-v10.html)
