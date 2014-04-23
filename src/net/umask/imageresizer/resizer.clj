@@ -48,7 +48,7 @@
         handler)))
 
 (defn- validate-checksum [secretkey uri]
-  (let [[empty checksum rest] (split uri #"/" 3)
+  (let [[checksum rest] (split uri #"/" 2)
         computedchecksum (digest/md5 (str secretkey rest))]
     (= checksum computedchecksum)))
 
@@ -82,7 +82,7 @@
 
 (defn create-ring-handler [secretkey store]
   (fn [request]
-    (let [uri (:uri request)
+    (let [uri (subs (:uri request) 1)
           resizeroptions (:imageresizer request)
           originalname (:original resizeroptions)
           checksum (get-in request [:imageresizer :checksum])
@@ -92,7 +92,7 @@
               (not  checksumvalid?))
         {:status 404
          :content-type "text/plain"
-         :body (str uri " not valid")}
+         :body (str uri " not valid:" resizeroptions )}
         (let [transformedimage (transform original resizeroptions)]
           (store-write store uri (io/input-stream transformedimage))
           {:status 200

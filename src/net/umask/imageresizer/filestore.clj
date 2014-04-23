@@ -17,5 +17,5 @@
   (store-read [this name]
     (io/input-stream (getfile (:basedir this) name))))
 
-(defn file-store [basedir]
+(defn create-filestore [basedir]
   (->FileStore basedir))

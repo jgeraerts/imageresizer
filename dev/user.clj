@@ -15,12 +15,9 @@
    [net.umask.imageresizer.resizer :as resizer]
    [net.umask.imageresizer.memorystore :as memstore]
    [net.umask.imageresizer.server :as imgserver]
-   [net.umask.imageresizer.store :as store])
+   [net.umask.imageresizer.store :as store]
+   [net.umask.imageresizer.s3store :as s3store])
   (:use ring.middleware.params))
-
-(defn handler [req] {:status  200
-                     :headers {"Content-Type" "text/html"}
-                     :body    (pr-str req)})
 
 
 (defn create-test-system []
@@ -29,9 +26,8 @@
     (do
       (store/store-write mstore "rose.jpg" rose))
     (component/system-map
-     
-     :resizer (resizer/create-resizer "verysecret" mstore)
-     :server  (component/using  (imgserver/create-server) [:resizer]))))
+     :vhost {"localhost" (resizer/create-resizer "verysecret" mstore)}
+     :server  (component/using  (imgserver/create-server) [:vhost]))))
 
 (def system
   "A Var containing an object representing the application under
