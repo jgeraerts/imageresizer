@@ -73,7 +73,7 @@
     (img/rotate img angle)
     img))
 
-(defn- transform [original options]
+(defn- transform [^java.io.InputStream original options]
   (let [bos (java.io.ByteArrayOutputStream.)]
     (try 
       (-> (img/read original)
