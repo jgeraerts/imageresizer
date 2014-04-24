@@ -75,10 +75,12 @@
 
 (defn- transform [original options]
   (let [bos (java.io.ByteArrayOutputStream.)]
-    (-> (img/read original)
-        (crop (:crop options))
-        (scale (:size options))
-        (img/write bos))
+    (try 
+      (-> (img/read original)
+          (crop (:crop options))
+          (scale (:size options))
+          (img/write bos))
+      (finally (.close original)))
     (.toByteArray bos)))
 
 (defn create-ring-handler [secretkey store]
