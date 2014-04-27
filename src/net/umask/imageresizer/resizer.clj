@@ -58,7 +58,12 @@
   [i {size :size width :width height :height}]
   (cond
    (not (nil? size))(img/scale i :size size)
-   (not (or (nil? width) (nil? height))) (img/scale i :width width :height height :fit :crop)
+   (not (or (nil? width) (nil? height))) (img/scale i
+                                                    :width width
+                                                    :height height
+                                                    :fit :crop
+                                                    :method :ultra-quality
+                                                    :ops [:antialias])
    :else i ))
 
 (defn- crop
@@ -79,7 +84,7 @@
       (-> (img/read original)
           (crop (:crop options))
           (scale (:size options))
-          (img/write bos))
+          (img/write bos :quality 100))
       (finally (.close original)))
     (.toByteArray bos)))
 

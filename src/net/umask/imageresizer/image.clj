@@ -6,7 +6,7 @@
            [java.io OutputStream InputStream]
            [java.awt.image RenderedImage BufferedImageOp]
            [javax.imageio ImageIO ImageWriter ImageWriteParam IIOImage]
-           [javax.imageio.stream FileImageOutputStream]))
+           [javax.imageio.stream FileImageOutputStream FileCacheImageOutputStream]))
 
 (set! *warn-on-reflection* true)
 
@@ -17,8 +17,25 @@
   (ImageIO/read source))
 
 (defn write
-  [img dest]
-  (ImageIO/write ^RenderedImage img "jpg" ^OutputStream dest))
+  "Writes img, a RenderedImage, to dest, an OutputStream
+ 
+  Takes the following keys as options:
+ 
+      :format  - :gif, :jpg, :png or anything supported by ImageIO
+      :quality - for JPEG images, a number between 0 and 100"
+  [^RenderedImage img ^OutputStream dest & {:keys [format quality] :or {format :jpg}}]
+  (if (or (not quality) (not (contains? #{:jpg :jpeg} format)))
+    (ImageIO/write img (name format) dest)
+    (let [iw (doto ^ImageWriter (first
+                                  (iterator-seq
+                                    (ImageIO/getImageWritersByFormatName
+                                      "jpeg")))
+                   (.setOutput (FileCacheImageOutputStream.  dest nil)))
+          iw-param (doto ^ImageWriteParam (.getDefaultWriteParam iw)
+                     (.setCompressionMode ImageWriteParam/MODE_EXPLICIT)
+                     (.setCompressionQuality (float (/ quality 100))))
+          iio-img (IIOImage. img nil nil)]
+      (.write iw nil iio-img iw-param))))
 
 (def ^:private scalr-methods
   {:auto Scalr$Method/AUTOMATIC

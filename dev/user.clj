@@ -12,6 +12,7 @@
    [clojure.test :as test]
    [clojure.tools.namespace.repl :refer (refresh refresh-all)]
    [com.stuartsierra.component :as component]
+   [aws.sdk.s3 :as s3]
    [net.umask.imageresizer.resizer :as resizer]
    [net.umask.imageresizer.memorystore :as memstore]
    [net.umask.imageresizer.server :as imgserver]
