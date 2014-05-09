@@ -1,5 +1,5 @@
 (ns net.umask.imageresizer.server
-  (:use [com.net.umask.imageresizer :only [vhost-handler]])
+  (:use [net.umask.imageresizer.vhost :only [vhost-handler]])
   (:require [com.stuartsierra.component :as component]
             [netty.ring.adapter :as netty]))
 
