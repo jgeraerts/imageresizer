@@ -1,4 +1,4 @@
-(ns net.umask.imageresizer.test.filestore_test
+(ns net.umask.imageresizer.filestore_test
    (:use net.umask.imageresizer.filestore
           net.umask.imageresizer.store
           clojure.test)

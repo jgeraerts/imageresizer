@@ -16,7 +16,7 @@
   (testing "make vhost map with empty vector and function"
     (let [result (make-vhostmap [[] identity])]
       (is (= {} result))))
-  (testing "Make vhost map with empty vector"x
+  (testing "Make vhost map with empty vector"
     (is (= {} (make-vhostmap []))))
   (testing "invalid parameters"
     (is (thrown? AssertionError (make-vhostmap ["blaat"])))))
