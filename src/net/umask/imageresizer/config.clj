@@ -13,8 +13,8 @@
 (defn filestore [&{:keys [basedir]}]
   (create-filestore basedir))
 
-(defn vhost-alias [aliases app]
-  (reduce #(assoc %1 %2 app) {} aliases))
+(defn- vhost-alias [aliases app]
+  (reduce #(assoc %1 %2 app) {} (if (vector? aliases) aliases [aliases])))
 
 (defn make-vhostmap [vhosts]
   (assert (even? (count vhosts)) "vhosts should have an even amount of elements")
