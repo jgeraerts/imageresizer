@@ -15,10 +15,17 @@
                  [org.clojure/tools.cli "0.3.1"]
                  [org.clojure/tools.logging "0.2.6"]
                  [ch.qos.logback/logback-classic "1.1.2"]
-                 [org.slf4j/jcl-over-slf4j "1.7.7"]]
+                 [org.slf4j/jcl-over-slf4j "1.7.7"]
+                 [cider/cider-nrepl "0.7.0-SNAPSHOT"]]
   :exclusions [commons-logging/commons-logging]
   :main net.umask.imageresizer
-  :repl-options {:init-ns user}
+  :repl-options {:init-ns user
+                 :nrepl-middleware [cider.nrepl.middleware.classpath/wrap-classpath
+                                    cider.nrepl.middleware.complete/wrap-complete
+                                    cider.nrepl.middleware.info/wrap-info
+                                    cider.nrepl.middleware.inspect/wrap-inspect
+                                    cider.nrepl.middleware.stacktrace/wrap-stacktrace
+                                    cider.nrepl.middleware.trace/wrap-trace]}
   
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.4"] [ring-mock "0.1.5"]]
                    :source-paths ["dev"]}})
