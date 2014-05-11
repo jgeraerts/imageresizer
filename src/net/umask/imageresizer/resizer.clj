@@ -56,7 +56,7 @@
            :content-type "text/plain"
            :body ""})
         (let [transformedimage (transform original resizeroptions)]
-          (do  (store-write store uri (io/input-stream transformedimage))
+          (do  (store-write store (:uri resizeroptions) (io/input-stream transformedimage))
                {:status 200
                 :content-type "image/jpeg"
                 :body (io/input-stream transformedimage)}))))))

@@ -32,22 +32,22 @@
         resizer (create-resizer secret mstore)
         handler (:handler resizer)]
     (testing "resize a rose"
-      (let [uri (addchecksum secret "size/300/rose.jpg")
-            resized  (handler (request :get uri))]
+      (let [uri "size/300/rose.jpg"
+            resized  (handler (request :get (addchecksum secret uri)))]
         (is (= [300 242] (getsize (:body  resized))))
-        (is (contains? @(:store mstore) (subs  uri 1))))
-      (let [uri (addchecksum secret "size/200x200/rose.jpg")
-            resized  (handler (request :get uri))]
+        (is (contains? @(:store mstore) uri)))
+      (let [uri "size/200x200/rose.jpg"
+            resized  (handler (request :get (addchecksum secret uri)))]
         (is (= [200 200] (getsize (:body  resized))))
-        (is (contains? @(:store mstore) (subs  uri 1))))
-      (let [uri (addchecksum secret "crop/20x20x200x200/rose.jpg")
-            resized  (handler (request :get uri))]
+        (is (contains? @(:store mstore) uri)))
+      (let [uri "crop/20x20x200x200/rose.jpg"
+            resized  (handler (request :get (addchecksum secret uri)))]
         (is (= [200 200] (getsize (:body  resized))))
-        (is (contains? @(:store mstore) (subs  uri 1))))
-      (let [uri (addchecksum secret "rotate/30/size/200x200/rose.jpg")
-            resized  (handler (request :get uri))]
+        (is (contains? @(:store mstore) uri)))
+      (let [uri  "rotate/30/size/200x200/rose.jpg"
+            resized  (handler (request :get (addchecksum secret uri)))]
         (is (= [200 200] (getsize (:body  resized))))
-        (is (contains? @(:store mstore) (subs  uri 1)))))
+        (is (contains? @(:store mstore) uri))))
     (testing "a non existing original should return 404"
       (let [resized (handler (request :get (addchecksum secret  "size/200x200/nonexisting")))]
         (is (= 404 (:status resized)))))))
