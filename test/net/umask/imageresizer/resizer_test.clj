@@ -47,4 +47,7 @@
       (let [uri (addchecksum secret "rotate/30/size/200x200/rose.jpg")
             resized  (handler (request :get uri))]
         (is (= [200 200] (getsize (:body  resized))))
-        (is (contains? @(:store mstore) (subs  uri 1)))))))
+        (is (contains? @(:store mstore) (subs  uri 1)))))
+    (testing "a non existing original should return 404"
+      (let [resized (handler (request :get (addchecksum secret  "size/200x200/nonexisting")))]
+        (is (= 404 (:status resized)))))))
