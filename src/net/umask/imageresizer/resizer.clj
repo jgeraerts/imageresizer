@@ -43,7 +43,7 @@
       (finally (.close original)))
     (.toByteArray bos)))
 
-(defn create-ring-handler [secretkey store]
+(defn create-ring-handler [store]
   (fn [request]
     (let [uri (subs (:uri request) 1)
           resizeroptions (:imageresizer request)
@@ -61,7 +61,7 @@
                 :content-type "image/jpeg"
                 :body (io/input-stream transformedimage)}))))))
 
-(defn create-resizer [secretkey store]
+(defn create-resizer [secret store]
   {:store store
-   :secretkey secretkey
-   :handler (wrap-url-parser  (create-ring-handler secretkey store))})
+   
+   :handler (wrap-url-parser secret (create-ring-handler store))})
