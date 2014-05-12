@@ -19,7 +19,7 @@
                  [cider/cider-nrepl "0.7.0-SNAPSHOT"]]
   :exclusions [commons-logging/commons-logging]
   :main net.umask.imageresizer
-  :aot [net.umask.imageresizer]
+  ;:aot [net.umask.imageresizer]
   :repl-options {:init-ns user
                  :nrepl-middleware [cider.nrepl.middleware.classpath/wrap-classpath
                                     cider.nrepl.middleware.complete/wrap-complete
