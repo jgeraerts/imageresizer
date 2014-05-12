@@ -8,18 +8,22 @@
             [net.umask.imageresizer.image :as img]
             digest))
 
+(defmulti scale (fn [image size] (if-not (nil? size) (keys size))))
 
-(defn- scale
-  [i {size :size width :width height :height}]
-  (cond
-   (not (nil? size))(img/scale i :size size)
-   (not (or (nil? width) (nil? height))) (img/scale i
-                                                    :width width
-                                                    :height height
-                                                    :fit :crop
-                                                    :method :ultra-quality
-                                                    :ops [:antialias])
-   :else i ))
+(defmethod scale '(:size) [image {size :size}]
+  (img/scale image :size size :fit :auto :method :ultra-quality :ops [:antialias]))
+
+(defmethod scale '(:height :width) [image {width :width height :height}]
+  (img/scale image :width width :height height :fit :crop :method :ultra-quality :ops [:antialias]))
+
+(defmethod scale '(:height) [image {height :height}]
+  (img/scale image :size height :fit :height :method :ultra-quality :ops [:antialias]))
+
+(defmethod scale '(:width) [image {width :width}]
+  (debug "scaling to width " width)
+  (img/scale image :size width :fit :width :method :ultra-quality :ops [:antialias]))
+
+(defmethod scale nil [image size] image)
 
 (defn- crop
   [i {x :x y :y width :width height :height}]

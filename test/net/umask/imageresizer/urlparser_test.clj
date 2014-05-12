@@ -25,7 +25,11 @@
           :size {:size 300}} "size/300/foo/bar/original.jpg"
          {:original "foo/bar/original.jpg"
           :size {:size 300}
-          :rotate {:angle  30}} "rotate/30/size/300/foo/bar/original.jpg"))
+          :rotate {:angle  30}} "rotate/30/size/300/foo/bar/original.jpg"
+         {:original "foo/bar/original.jpg"
+          :size {:width 300}} "size/300w/foo/bar/original.jpg"
+         {:original "foo/bar/original.jpg"
+          :size {:height 300}} "size/300h/foo/bar/original.jpg"))
   (testing "an invalid checksum should result in status 400 bad request"
     (let [result (handler (request :get "/invalidchecksum/size/300/original.jpg"))]
       (is (= 400 (:status result))))

@@ -34,19 +34,33 @@
     (testing "resize a rose"
       (let [uri "size/300/rose.jpg"
             resized  (handler (request :get (addchecksum secret uri)))]
+        (is (= 200 (:status resized)))
         (is (= [300 242] (getsize (:body  resized))))
         (is (contains? @(:store mstore) uri)))
       (let [uri "size/200x200/rose.jpg"
             resized  (handler (request :get (addchecksum secret uri)))]
+        (is (= 200 (:status resized)))
         (is (= [200 200] (getsize (:body  resized))))
         (is (contains? @(:store mstore) uri)))
       (let [uri "crop/20x20x200x200/rose.jpg"
             resized  (handler (request :get (addchecksum secret uri)))]
+        (is (= 200 (:status resized)))
         (is (= [200 200] (getsize (:body  resized))))
         (is (contains? @(:store mstore) uri)))
       (let [uri  "rotate/30/size/200x200/rose.jpg"
             resized  (handler (request :get (addchecksum secret uri)))]
+        (is (= 200 (:status resized)))
         (is (= [200 200] (getsize (:body  resized))))
+        (is (contains? @(:store mstore) uri)))
+      (let [uri  "size/200w/rose.jpg"
+            resized  (handler (request :get (addchecksum secret uri)))]
+        (is (= 200 (:status resized)))
+        (is (= [200 161] (getsize (:body  resized))))
+        (is (contains? @(:store mstore) uri)))
+      (let [uri  "size/200h/rose.jpg"
+            resized  (handler (request :get (addchecksum secret uri)))]
+        (is (= 200 (:status resized)))
+        (is (= [248 200] (getsize (:body  resized))))
         (is (contains? @(:store mstore) uri))))
     (testing "a non existing original should return 404"
       (let [resized (handler (request :get (addchecksum secret  "size/200x200/nonexisting")))]

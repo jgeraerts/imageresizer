@@ -9,7 +9,9 @@
 (def ^:const ops [{:key :crop :re-value #"^([0-9]+)x([0-9]+)x([0-9]+)x([0-9]+)$" :keys [:x :y :width :height]}
                   {:key :rotate :re-value #"^([0-9]+)$" :keys [:angle]}
                   {:key :size :re-value #"^([0-9]+)x([0-9]+)$" :keys [:width :height]}
-                  {:key :size :re-value #"^([0-9]+)$" :keys [:size]}])
+                  {:key :size :re-value #"^([0-9]+)$" :keys [:size]}
+                  {:key :size :re-value #"^([0-9]+)w$" :keys [:width]}
+                  {:key :size :re-value #"^([0-9]+)h$" :keys [:height]}])
 
 (defn- option-map [op key value]
   (if (= (name (:key op)) key)
