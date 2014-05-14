@@ -6,12 +6,32 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [net.umask.imageresizer.image :as img]
-            digest))
+            digest)
+  (:import [java.awt.image BufferedImage]
+           [java.awt Graphics Color]))
 
 (defmulti scale (fn [image size] (if-not (nil? size) (keys size))))
 
 (defmethod scale '(:size) [image {size :size}]
   (img/scale image :size size :fit :auto :method :ultra-quality :ops [:antialias]))
+
+(defmethod scale '(:color :height :width) [image {height :height width :width color :color}]
+  (let [resized-image (img/scale image
+                                 :width width
+                                 :height height :fit :auto :method :ultra-quality :ops [:antialias])
+        color (Color. color)
+        new-image (BufferedImage. width height BufferedImage/TYPE_INT_RGB)
+        graphics (.getGraphics new-image)
+        resized-image-height (.getHeight resized-image)
+        resized-image-width  (.getWidth resized-image)
+        x (/ (- width resized-image-width) 2)
+        y (/ (- height resized-image-height) 2)]
+    (do (doto graphics
+          (.setColor  color)
+          (.fillRect 0 0 width height)
+          (.drawImage resized-image x y nil)
+          (.dispose))
+        new-image)))
 
 (defmethod scale '(:height :width) [image {width :width height :height}]
   (img/scale image :width width :height height :fit :crop :method :ultra-quality :ops [:antialias]))

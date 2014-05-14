@@ -1,6 +1,6 @@
 (ns net.umask.imageresizer.urlparser
   (:use [clojure.string :only [join split]]
-        [clojure.tools.logging :only [trace]])
+        [clojure.tools.logging :only [warn trace]])
   (:require [clojure.edn :as edn]
             digest))
 
@@ -9,6 +9,7 @@
 (def ^:const ops [{:key :crop :re-value #"^([0-9]+)x([0-9]+)x([0-9]+)x([0-9]+)$" :keys [:x :y :width :height]}
                   {:key :rotate :re-value #"^([0-9]+)$" :keys [:angle]}
                   {:key :size :re-value #"^([0-9]+)x([0-9]+)$" :keys [:width :height]}
+                  {:key :size :re-value #"^([0-9]+)x([0-9]+)-(0x[0-9A-Fa-f]{6})$" :keys [:width :height :color]}
                   {:key :size :re-value #"^([0-9]+)$" :keys [:size]}
                   {:key :size :re-value #"^([0-9]+)w$" :keys [:width]}
                   {:key :size :re-value #"^([0-9]+)h$" :keys [:height]}])
@@ -49,7 +50,8 @@
         remaining-uri (get-in request [:imageresizer :uri])]
     (if (= checksum (digest/md5 (str secret remaining-uri))) 
       (handler request)
-      {:status 400})))
+      ( do (warn "invalid checksum " checksum " for request " (:uri request))
+           {:status 400}))))
 
 (defn wrap-url-parser [secret handler]
   (fn [request]

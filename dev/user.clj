@@ -13,6 +13,7 @@
    [clojure.tools.namespace.repl :refer (refresh refresh-all)]
    [com.stuartsierra.component :as component]
    [aws.sdk.s3 :as s3]
+   [digest]
    [net.umask.imageresizer.resizer :as resizer]
    [net.umask.imageresizer.memorystore :as memstore]
    [net.umask.imageresizer.server :as imgserver]
@@ -20,6 +21,11 @@
    [net.umask.imageresizer.s3store :as s3store])
   (:use ring.middleware.params))
 
+(def secret "verysecret")
+
+(defn buildurl [url]
+  (let [checksum (digest/md5 (str  secret url))]
+    (str "/" checksum "/" url)))
 
 (defn create-test-system []
   (let [mstore (memstore/create-memstore)
@@ -27,7 +33,7 @@
     (do
       (store/store-write mstore "rose.jpg" rose))
     (component/system-map
-     :vhost {"localhost" (resizer/create-resizer "verysecret" mstore)}
+     :vhost {"localhost" (resizer/create-resizer secret mstore)}
      :server  (component/using  (imgserver/create-server) [:vhost]))))
 
 (def system

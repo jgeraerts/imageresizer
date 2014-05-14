@@ -5,9 +5,7 @@
             [com.stuartsierra.component :as component])
   (:use [net.umask.imageresizer
          [config :only [load-config]]
-         [server :only [create-server]]
-         
-         ]
+         [server :only [create-server]]]
         [clojure.tools.logging :only [info]])
   (:gen-class))
 
