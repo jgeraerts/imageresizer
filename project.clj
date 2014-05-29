@@ -1,4 +1,4 @@
-(defproject net.umask/imageresizer "0.1.0"
+(defproject net.umask/imageresizer "0.2.0-SNAPSHOT"
   :description simple on the fly image resizing server
   :url "https://github.com/jogeraerts/imageserver"
   :license {:name "Eclipse Public License"
