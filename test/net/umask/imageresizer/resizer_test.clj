@@ -10,12 +10,15 @@
            java.awt.image.BufferedImage
            javax.imageio.ImageIO))
 
+(defn- add-to-store [mstore resource]
+  (let [stream (io/input-stream (io/resource resource))]
+    (do (store/store-write mstore resource stream))))
 
 (defn- memory-store []
-  (let [mstore (memstore/create-memstore)
-        rose (io/input-stream (io/resource "rose.jpg"))]
-    (do (store/store-write mstore "rose.jpg" rose)
-        mstore)))
+  (let [mstore (memstore/create-memstore)]
+    (doseq [i ["rose.jpg" "portrait.jpg" "landscape.jpg"]]
+      (add-to-store mstore i))
+    mstore))
 
 (defn- addchecksum [secret url]
   (str "/" (digest/md5 (str secret url)) "/" url))
@@ -26,47 +29,48 @@
        (catch Throwable e [0 0])
        (finally (.close stream))))
 
-(deftest test-scaling
+(deftest test-non-existing-image
   (let [secret "secret"
         mstore (memory-store)
         resizer (create-resizer secret mstore)
         handler (:handler resizer)]
-    (testing "resize a rose"
-      (let [uri "size/300/rose.jpg"
-            resized  (handler (request :get (addchecksum secret uri)))]
-        (is (= 200 (:status resized)))
-        (is (= [300 242] (getsize (:body  resized))))
-        (is (contains? @(:store mstore) uri)))
-      (let [uri "size/200x200/rose.jpg"
-            resized  (handler (request :get (addchecksum secret uri)))]
-        (is (= 200 (:status resized)))
-        (is (= [200 200] (getsize (:body  resized))))
-        (is (contains? @(:store mstore) uri)))
-      (let [uri "crop/20x20x200x200/rose.jpg"
-            resized  (handler (request :get (addchecksum secret uri)))]
-        (is (= 200 (:status resized)))
-        (is (= [200 200] (getsize (:body  resized))))
-        (is (contains? @(:store mstore) uri)))
-      (let [uri  "rotate/30/size/200x200/rose.jpg"
-            resized  (handler (request :get (addchecksum secret uri)))]
-        (is (= 200 (:status resized)))
-        (is (= [200 200] (getsize (:body  resized))))
-        (is (contains? @(:store mstore) uri)))
-      (let [uri  "size/200w/rose.jpg"
-            resized  (handler (request :get (addchecksum secret uri)))]
-        (is (= 200 (:status resized)))
-        (is (= [200 161] (getsize (:body  resized))))
-        (is (contains? @(:store mstore) uri)))
-      (let [uri  "size/200h/rose.jpg"
-            resized  (handler (request :get (addchecksum secret uri)))]
-        (is (= 200 (:status resized)))
-        (is (= [248 200] (getsize (:body  resized))))
-        (is (contains? @(:store mstore) uri)))
-      (let [uri  "size/200x200-0xDDDDDD/rose.jpg"
-            resized  (handler (request :get (addchecksum secret uri)))]
-        (is (= 200 (:status resized)))
-        (is (= [200 200] (getsize (:body  resized))))
-        (is (contains? @(:store mstore) uri))))
-    (testing "a non existing original should return 404"
+        (testing "a non existing original should return 404"
       (let [resized (handler (request :get (addchecksum secret  "size/200x200/nonexisting")))]
         (is (= 404 (:status resized)))))))
+
+(defn- run-resizer
+  "Runs the resizer with a specific uri returns the result as a vector in the form as
+
+  [httpstatus size instore]
+  where
+    httpstatus  - the http status returned for the request
+    size        - a vector of the resized image in the form of [width height]
+    instore     - a boolean indicating the image uri was found in the store after resizing"
+
+  [uri]
+  (let [secret "secret"
+        mstore (memory-store)
+        resizer (create-resizer secret mstore)
+        handler (:handler resizer)
+        resized (handler (request :get (addchecksum secret uri)))
+        status (:status resized)
+        size (getsize (:body resized))
+        uri-in-mstore (contains? @(:store mstore) uri)]
+    [status size uri-in-mstore]))
+
+(deftest test-resizer
+  (are [result uri] (= result (run-resizer uri))
+       [200 [225 300] true] "size/300/portrait.jpg"
+       [200 [300 225] true] "size/300/landscape.jpg"
+       [200 [200 200] true] "size/200x200/portrait.jpg"
+       [200 [200 200] true] "size/200x200/landscape.jpg"
+       [200 [200 200] true] "crop/20x20x200x200/portrait.jpg"
+       [200 [200 200] true] "crop/20x20x200x200/landscape.jpg"
+       [200 [100 100] true] "crop/20x20x200x200/size/100/portrait.jpg"
+       [200 [100 100] true] "crop/20x20x200x200/size/100/landscape.jpg"
+       [200 [200 267] true] "size/200w/portrait.jpg"
+       [200 [200 150] true] "size/200w/landscape.jpg"
+       [200 [150 200] true] "size/200h/portrait.jpg"
+       [200 [267 200] true] "size/200h/landscape.jpg"
+       [200 [200 200] true] "size/200x200-0xDDDDDD/portrait.jpg"
+       [200 [200 200] true] "size/200x200-0xDDDDDD/landscape.jpg"))

@@ -92,12 +92,14 @@
         height (or height size)
         ops (into-array BufferedImageOp (map #(get scalr-ops % %) ops))
         fit* (if (= :crop fit)
-               (if (< height width)
-                 :width :height)
+               (cond
+                (= height width) (if (< (.getHeight img) (.getWidth img)) :height :width)
+                (< height width) :width
+                :else :height)
                fit)
         scaled-img ^RenderedImage (Scalr/resize
-                                    img (scalr-methods method) (scalr-fits fit*)
-                                    width height ops)]
+                                   img (scalr-methods method) (scalr-fits fit*)
+                                   width height ops)]
     (if-not (= :crop fit)
       scaled-img
       (let [[x y] (if (= :width fit*)
