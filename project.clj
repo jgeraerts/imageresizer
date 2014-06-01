@@ -5,7 +5,6 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [netty-ring-adapter "0.4.6"]
-                 [midje "1.6.3"]
                  [org.imgscalr/imgscalr-lib "4.2"]
                  [clj-aws-s3 "0.3.9"]
                  [org.clojure/tools.cli "0.3.1"]
