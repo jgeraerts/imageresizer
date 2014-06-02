@@ -1,6 +1,7 @@
 (ns net.umask.imageresizer.image
   (:refer-clojure :exclude [read])
   (:require [clojure.java.io :as io])
+  (:use [clojure.tools.logging :only (trace)])
   (:import [org.imgscalr Scalr Scalr$Method Scalr$Mode]
            [java.awt Image]
            [java.io OutputStream InputStream]
@@ -91,15 +92,17 @@
   (let [width (or width size)
         height (or height size)
         ops (into-array BufferedImageOp (map #(get scalr-ops % %) ops))
+        img-width (.getWidth img)
+        img-height (.getHeight img)
         fit* (if (= :crop fit)
-               (cond
-                (= height width) (if (< (.getHeight img) (.getWidth img)) :height :width)
-                (< height width) :width
-                :else :height)
+               (if (>= (/ height width) (/ img-height img-width))
+                 :height
+                 :width)
                fit)
         scaled-img ^RenderedImage (Scalr/resize
                                    img (scalr-methods method) (scalr-fits fit*)
                                    width height ops)]
+    (trace "dimensions scaled image " (.getWidth scaled-img) "x" (.getHeight scaled-img))
     (if-not (= :crop fit)
       scaled-img
       (let [[x y] (if (= :width fit*)
