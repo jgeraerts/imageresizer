@@ -11,7 +11,10 @@
       (try
         (do
           (io/copy stream tempfile)
-          (s3/put-object (:cred this) (:bucket this) name tempfile))
+          (s3/put-object (:cred this) (:bucket this)
+                         name tempfile
+                         {:content-type "image/jpeg"}
+                         (s3/grant :all-users :read)))
         (finally (.delete tempfile)))))
   (store-read [this name]
     (try 
