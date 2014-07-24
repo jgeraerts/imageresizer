@@ -39,11 +39,11 @@
      errors (exit 1 (error-msg errors)))
     (let [{:keys [config]} options
           c (load-config config)
-          netty-config (:netty c)
+          http-config (:httpconfig c)
           vhosts (:vhosts c)]
       (do  (component/start
             (component/system-map
              :vhost vhosts
-             :server (component/using (create-server netty-config) [:vhost])))
-           (info "Server started. Listening on port" (get-in netty-config [:port]))
+             :server (component/using (create-server http-config) [:vhost])))
+           (info "Server started. Listening on port" (get-in http-config [:port]))
            nil))))

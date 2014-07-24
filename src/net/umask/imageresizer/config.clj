@@ -20,8 +20,8 @@
   (assert (even? (count vhosts)) "vhosts should have an even amount of elements")
   (reduce #(merge %1 (vhost-alias (first %2) (second %2))) {} (partition 2 vhosts)))
 
-(defn defconfig [&{:keys [netty vhosts]}]
-  {:netty netty
+(defn defconfig [&{:keys [http vhosts]}]
+  {:httpconfig http
    :vhosts (make-vhostmap vhosts)})
 
 (defn load-config [file]

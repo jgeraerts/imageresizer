@@ -1,20 +1,20 @@
 (ns net.umask.imageresizer.server
   (:use [net.umask.imageresizer.vhost :only [vhost-handler]])
   (:require [com.stuartsierra.component :as component]
-            [netty.ring.adapter :as netty]))
+            [org.httpkit.server :as httpkit]))
 
 
 
-(defrecord Server [nettyconfig vhost]
+(defrecord Server [httpconfig vhost]
   component/Lifecycle
 
   (start [this]
-    (assoc this :server (netty/start-server (vhost-handler (:vhost this)) (:nettyconfig this))))
+    (assoc this :server (httpkit/run-server (vhost-handler (:vhost this)) (:httpconfig this))))
   (stop [this]
     ((:server this))))
 
 (defn create-server
   ([]
-     (map->Server {:nettyconfig {:port 8080}}))
-  ([nettyconfig]
-     (map->Server {:nettyconfig nettyconfig}))  )
+     (map->Server {:httpconfig {:port 8080}}))
+  ([httpconfig]
+     (map->Server {:httpconfig httpconfig})))
