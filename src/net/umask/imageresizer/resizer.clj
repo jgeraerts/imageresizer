@@ -2,7 +2,8 @@
   (:use [clojure.string :only [split join]]
         net.umask.imageresizer.store
         net.umask.imageresizer.urlparser
-        [clojure.tools.logging :only [info debug]])
+        [clojure.tools.logging :only [info debug]]
+        [ring.util.response :only [response not-found header content-type]])
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [net.umask.imageresizer.image :as img]
@@ -76,14 +77,13 @@
       (if (nil? original)
         (do
           (info "image not found or checksum not valid for uri" uri)
-          {:status 404
-           :content-type "text/plain"
-           :body ""})
+          (-> (not-found (str "original file " originalname " not found"))
+              (content-type "text/plain")))
         (let [transformedimage (transform original resizeroptions)]
           (do  (store-write store (:uri resizeroptions) (io/input-stream transformedimage))
-               {:status 200
-                :content-type "image/jpeg"
-                :body (io/input-stream transformedimage)}))))))
+               (-> (response (io/input-stream transformedimage))
+                   (content-type "image/jpeg")
+                   (header "Content-Length" (alength transformedimage)))))))))
 
 (defn create-resizer [secret store]
   {:store store
