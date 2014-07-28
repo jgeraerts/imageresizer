@@ -4,6 +4,15 @@
   (:use clojure.test)
   (:import javax.imageio.ImageIO ))
 
+(def notnil? (comp not nil?))
+
+(deftest test-read
+  (are [uri] (notnil? (i/read (io/input-stream (io/resource uri))))
+       "rose.jpg"
+       "rose-cmyk.jpg"
+       "rose.tiff"
+       "rose-cmyk.tiff"))
+
 (deftest resize
   (let [rose (ImageIO/read (io/input-stream (io/resource "rose.jpg")))
         resized1 (i/scale rose :width 1500 :height 100 :fit :crop)

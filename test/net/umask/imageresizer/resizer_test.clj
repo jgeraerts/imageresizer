@@ -16,7 +16,7 @@
 
 (defn- memory-store []
   (let [mstore (memstore/create-memstore)]
-    (doseq [i ["rose.jpg" "portrait.jpg" "landscape.jpg"]]
+    (doseq [i ["rose.jpg" "portrait.jpg" "landscape.jpg" "rose-cmyk.tiff" "rose-cmyk.jpg"]]
       (add-to-store mstore i))
     mstore))
 
@@ -85,4 +85,7 @@
        [200 [150 200] true] "size/200h/portrait.jpg"
        [200 [267 200] true] "size/200h/landscape.jpg"
        [200 [200 200] true] "size/200x200-0xDDDDDD/portrait.jpg"
-       [200 [200 200] true] "size/200x200-0xDDDDDD/landscape.jpg"))
+       [200 [200 200] true] "size/200x200-0xDDDDDD/landscape.jpg"
+       [200 [200 200] true] "size/200x200/rose.jpg"
+       [200 [200 200] true] "size/200x200/rose-cmyk.jpg"
+       [200 [200 200] true] "size/200x200/rose-cmyk.tiff"))
