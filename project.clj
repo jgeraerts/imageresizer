@@ -27,7 +27,7 @@
                                     cider.nrepl.middleware.inspect/wrap-inspect
                                     cider.nrepl.middleware.stacktrace/wrap-stacktrace
                                     cider.nrepl.middleware.trace/wrap-trace]}
-  :profiles {:dev {:dependencies [[cider/cider-nrepl "0.7.0-SNAPSHOT"]
+  :profiles {:dev {:dependencies [[cider/cider-nrepl "0.7.0"]
                                   [org.clojure/tools.namespace "0.2.4"]
                                   [ring-mock "0.1.5"]]
                    :source-paths ["dev"]}})
