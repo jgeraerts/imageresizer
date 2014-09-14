@@ -17,9 +17,14 @@
   (img/scale image :size size :fit :auto :method :ultra-quality :ops [:antialias]))
 
 (defmethod scale '(:color :height :width) [image {height :height width :width color :color}]
-  (let [resized-image (img/scale image
+  (let [img-width (.getWidth image)
+        img-height (.getHeight image)
+        fit (if (>= (/ height width) (/ img-height img-width))
+              :width
+              :height)
+        resized-image (img/scale image
                                  :width width
-                                 :height height :fit :auto :method :ultra-quality :ops [:antialias])
+                                 :height height :fit fit :method :ultra-quality :ops [:antialias])
         color (Color. color)
         new-image (BufferedImage. width height BufferedImage/TYPE_INT_RGB)
         graphics (.getGraphics new-image)
@@ -73,17 +78,20 @@
     (let [uri (subs (:uri request) 1)
           resizeroptions (:imageresizer request)
           originalname (:original resizeroptions)
-          original (store-read store originalname)]
+          original (store-read store originalname)
+          store? (not= originalname (:uri resizeroptions))] ;; dont store the original again, causes quality degradation
       (if (nil? original)
         (do
           (info "image not found or checksum not valid for uri" uri)
           (-> (not-found (str "original file " originalname " not found"))
               (content-type "text/plain")))
         (let [transformedimage (transform original resizeroptions)]
-          (do  (store-write store (:uri resizeroptions) (io/input-stream transformedimage))
-               (-> (response (io/input-stream transformedimage))
-                   (content-type "image/jpeg")
-                   (header "Content-Length" (alength transformedimage)))))))))
+          (when store?
+            (debug "storing image " (:uri resizeroptions) " to storage")
+            (store-write store (:uri resizeroptions) (io/input-stream transformedimage)))
+          (-> (response (io/input-stream transformedimage))
+              (content-type "image/jpeg")
+              (header "Content-Length" (alength transformedimage))))))))
 
 (defn create-resizer [secret store]
   {:store store

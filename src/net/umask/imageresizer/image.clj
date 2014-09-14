@@ -102,7 +102,7 @@
         scaled-img ^RenderedImage (Scalr/resize
                                    img (scalr-methods method) (scalr-fits fit*)
                                    width height ops)]
-    (trace "dimensions scaled image " (.getWidth scaled-img) "x" (.getHeight scaled-img))
+    (trace "scaled image with dimenions " img-width "x" img-height " to " (.getWidth scaled-img) "x" (.getHeight scaled-img))
     (if-not (= :crop fit)
       scaled-img
       (let [[x y] (if (= :width fit*)
