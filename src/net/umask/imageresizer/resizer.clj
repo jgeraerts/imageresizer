@@ -63,12 +63,28 @@
     (img/rotate img angle)
     img))
 
+(defn- fill-alpha [img]
+  (let [width (.getWidth img)
+        height (.getHeight img)
+        type (.getType img)]
+    (if (= BufferedImage/TYPE_INT_ARGB type)
+      (let [new-image (BufferedImage. width height BufferedImage/TYPE_INT_RGB)
+            graphics (.getGraphics new-image)]
+        (do  (doto graphics
+               (.setColor Color/WHITE)
+               (.fillRect 0 0 width height)
+               (.drawImage img 0 0 nil)
+               (.dispose))
+             new-image))
+      img)))
+
 (defn- transform [^java.io.InputStream original options]
   (let [bos (java.io.ByteArrayOutputStream.)]
     (try 
       (-> (img/read original)
           (crop (:crop options))
           (scale (:size options))
+          (fill-alpha)
           (img/write bos :quality 100))
       (finally (.close original)))
     (.toByteArray bos)))
