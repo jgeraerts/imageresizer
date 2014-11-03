@@ -27,16 +27,17 @@
   [^RenderedImage img ^OutputStream dest & {:keys [format quality] :or {format :jpg}}]
   (if (or (not quality) (not (contains? #{:jpg :jpeg} format)))
     (ImageIO/write img (name format) dest)
-    (let [iw (doto ^ImageWriter (first
-                                  (iterator-seq
+    (with-open [imageOut (FileCacheImageOutputStream.  dest nil)] 
+      (let [iw (doto ^ImageWriter (first
+                                   (iterator-seq
                                     (ImageIO/getImageWritersByFormatName
-                                      "jpeg")))
-                   (.setOutput (FileCacheImageOutputStream.  dest nil)))
-          iw-param (doto ^ImageWriteParam (.getDefaultWriteParam iw)
-                     (.setCompressionMode ImageWriteParam/MODE_EXPLICIT)
-                     (.setCompressionQuality (float (/ quality 100))))
-          iio-img (IIOImage. img nil nil)]
-      (.write iw nil iio-img iw-param))))
+                                     "jpeg")))
+                     (.setOutput imageOut))
+            iw-param (doto ^ImageWriteParam (.getDefaultWriteParam iw)
+                           (.setCompressionMode ImageWriteParam/MODE_EXPLICIT)
+                           (.setCompressionQuality (float (/ quality 100))))
+            iio-img (IIOImage. img nil nil)]
+        (.write iw nil iio-img iw-param)))))
 
 (def ^:private scalr-methods
   {:auto Scalr$Method/AUTOMATIC
