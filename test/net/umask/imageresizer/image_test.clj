@@ -1,4 +1,4 @@
-(ns net.umask.imageresizer.image_test
+(ns net.umask.imageresizer.image-test
   (:require [net.umask.imageresizer.image :as i]
             [clojure.java.io :as io])
   (:use clojure.test)
@@ -21,3 +21,12 @@
     (is (= [1500 100] [(.getWidth resized1) (.getHeight resized1)]))
     (is (= [100 1500] [(.getWidth resized2) (.getHeight resized2)]))
     (is (= [100 100]  [(.getWidth resized3) (.getHeight resized3)]))))
+
+(deftest test-dimensions
+  (testing "testing when preferring width"
+    (is (= [100 150] (i/calculate-dimensions-width 1000 1500 100 100))))
+  (testing "testing when preferring height"
+    (is (= [67 100] (i/calculate-dimensions-height 1000 1500 100 100))))
+  (testing "testing depending on orientation"
+    (is (= [67 100] (i/calculate-dimensions-auto 1000 1500 100 100)))
+    (is (= [100 67] (i/calculate-dimensions-auto 1500 1000 100 100)))))

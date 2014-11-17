@@ -17,7 +17,8 @@
                  [org.clojure/tools.cli "0.3.1"]
                  [org.clojure/tools.logging "0.2.6"]
                  [ch.qos.logback/logback-classic "1.1.2"]
-                 [org.slf4j/jcl-over-slf4j "1.7.7"]]
+                 [org.slf4j/jcl-over-slf4j "1.7.7"]
+                 [com.mortennobel/java-image-scaling "0.8.5"]]
   :exclusions [commons-logging/commons-logging]
   :main net.umask.imageresizer
   :repl-options {:init-ns user}

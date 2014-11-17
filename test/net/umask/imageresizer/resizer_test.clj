@@ -1,4 +1,4 @@
-(ns net.umask.imageresizer.resizer_test
+(ns net.umask.imageresizer.resizer-test
   (:use net.umask.imageresizer.resizer
         clojure.test
         ring.mock.request)

@@ -3,13 +3,52 @@
   (:require [clojure.java.io :as io])
   (:use [clojure.tools.logging :only (trace)])
   (:import [org.imgscalr Scalr Scalr$Method Scalr$Mode]
-           [java.awt Image]
+           [java.awt Image Transparency]
            [java.io OutputStream InputStream]
-           [java.awt.image RenderedImage BufferedImageOp]
+           [java.awt.image BufferedImage RenderedImage BufferedImageOp]
            [javax.imageio ImageIO ImageWriter ImageWriteParam IIOImage]
-           [javax.imageio.stream FileImageOutputStream FileCacheImageOutputStream]))
+           [javax.imageio.stream FileImageOutputStream FileCacheImageOutputStream]
+           [com.mortennobel.imagescaling ResampleOp]))
 
 (set! *warn-on-reflection* true)
+
+(defn round-ratio [^Double x] (Math/round x))
+
+(defn calculate-dimensions-width
+  "calculate target dimensions prefering width"
+  [origWidth origHeight requestedWidth requestedHeight]
+  (let [ratio (/  origWidth origHeight)
+        targetHeight (round-ratio (/ requestedWidth ratio))]
+    [requestedWidth targetHeight]))
+
+(defn calculate-dimensions-height
+  "calculate target demensions preferring height"
+  [origWidth origHeight requestedWidth requestedHeight]
+  (let [ratio (/ origWidth origHeight)
+        targetWidth (round-ratio (* requestedHeight ratio))]
+    [targetWidth requestedHeight ]))
+
+(defn calculate-dimensions-auto
+  "calculate target dimensions based on orientation"
+  [origWidth origHeight requestedWidth requestedHeight]
+  (let [ratio (/ origWidth origHeight)]
+    (if (>= ratio 1)
+      [requestedWidth (round-ratio (/ requestedWidth ratio))]
+      [(round-ratio (* requestedHeight ratio)) requestedHeight])))
+
+(def ^:const fits {:height calculate-dimensions-height
+                   :width calculate-dimensions-width
+                   :auto calculate-dimensions-auto})
+
+(defn- ^BufferedImage resize
+  "Resize img "
+  [^BufferedImage img mode width height]
+  (let [origWidth (.getWidth img)
+        origHeight (.getHeight img)
+        [targetWidth targetHeight] ((mode fits) origWidth origHeight width height)
+        resample (ResampleOp. targetWidth targetHeight)]
+    (.filter resample img nil)))
+
 
 (defn read
   "Reads a BufferedImage from source, something that can be turned into
@@ -100,9 +139,11 @@
                  :height
                  :width)
                fit)
-        scaled-img ^RenderedImage (Scalr/resize
-                                   img (scalr-methods method) (scalr-fits fit*)
-                                   width height ops)]
+        ;; scaled-img ^RenderedImage (Scalr/resize
+        ;;                            img (scalr-methods method) (scalr-fits fit*)
+        ;;                            width height ops)
+        scaled-img (resize img fit* width height)
+        ]
     (trace "scaled image with dimenions " img-width "x" img-height " to " (.getWidth scaled-img) "x" (.getHeight scaled-img))
     (if-not (= :crop fit)
       scaled-img
@@ -112,3 +153,4 @@
             cropped-img (crop scaled-img x y width height)]
         (.flush ^Image scaled-img)
         cropped-img))))
+
