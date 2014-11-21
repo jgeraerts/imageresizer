@@ -22,7 +22,7 @@
   :exclusions [commons-logging/commons-logging]
   :main net.umask.imageresizer
   :repl-options {:init-ns user}
-  :plugins [[cider/cider-nrepl "0.7.0"]]
+  :plugins [[cider/cider-nrepl "0.8.1"]]
   :profiles {:dev {:dependencies [
                                   [org.clojure/tools.namespace "0.2.7"]
                                   [ring-mock "0.1.5"]]
