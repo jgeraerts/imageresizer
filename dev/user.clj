@@ -17,6 +17,7 @@
    [ring.middleware.params :refer :all]
    [net.umask.imageresizer.resizer :as resizer]
    [net.umask.imageresizer.memorystore :as memstore]
+   [net.umask.imageresizer.filestore :refer [create-filecache]]
    [net.umask.imageresizer.server :as imgserver]
    [net.umask.imageresizer.store :as store]
    [net.umask.imageresizer.s3store :as s3store]))
@@ -29,10 +30,11 @@
 
 (defn create-test-system []
   (let [mstore (memstore/create-memstore)
+        cache (create-filecache "/temp/ilecache")
         rose (io/input-stream (io/resource "rose.jpg"))]
-    (store/store-write mstore "rose.jpg" rose)
+    (memstore/memorystore-write  mstore "rose.jpg" rose)
     (component/system-map
-     :vhost {"localhost" (resizer/create-resizer secret mstore)}
+     :vhost {"localhost" (resizer/create-resizer secret mstore cache)}
      :server  (component/using  (imgserver/create-server) [:vhost]))))
 
 

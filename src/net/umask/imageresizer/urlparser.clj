@@ -1,7 +1,7 @@
 (ns net.umask.imageresizer.urlparser
   (:require [clojure.edn :as edn]
             [clojure.string :refer [join split]]
-            [clojure.tools.logging :refer [trace warn]]))
+            [clojure.tools.logging :refer [trace]]))
 
 (set! *warn-on-reflection* true)
 
@@ -25,9 +25,8 @@
 (defn- parse-url-into-options [uri-components]
   (trace "parse-url-into-options components " uri-components)
   (loop [ops ops
-         urlparts (rest uri-components)
-         result {:checksum (first uri-components)
-                 :uri      (join "/" urlparts)}]
+         urlparts uri-components
+         result {:uri (join "/" urlparts)}]
     (if (or  (empty? ops)
              (< (count urlparts) 3))
       (merge result {:original (join "/" urlparts)})
@@ -43,18 +42,9 @@
         resizer-map (parse-url-into-options uri-components)]
     (assoc request :imageresizer resizer-map)))
 
-(defn- if-checksum-valid? [request secret handler]
-  (trace  "if-checksum-valid? request:" request)
-  (let [checksum (get-in request [:imageresizer :checksum])
-        remaining-uri (get-in request [:imageresizer :uri])]
-    (if (= checksum (digest/md5 (str secret remaining-uri))) 
-      (handler request)
-      ( do (warn "invalid checksum " checksum " for request " (:uri request))
-           {:status 400}))))
-
-(defn wrap-url-parser [secret handler]
+(defn wrap-url-parser [handler]
   (fn [request]
     (-> request
         parse-url-request
-        (if-checksum-valid? secret handler))))
+        handler)))
 

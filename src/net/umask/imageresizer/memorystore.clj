@@ -1,6 +1,6 @@
 (ns net.umask.imageresizer.memorystore
   (:require [clojure.java.io :as io]
-            [net.umask.imageresizer.store :refer :all])
+            [net.umask.imageresizer.source :refer [ImageSource]])
   (:import (java.io ByteArrayOutputStream)))
 
 (defn- tobytes [stream]
@@ -8,12 +8,13 @@
     (io/copy stream bos)
     (.toByteArray bos)))
 
+
+(defn memorystore-write [this name stream]
+  (swap! (:store this) assoc name (tobytes stream)))
+
 (defrecord MemoryStore [store]
-  Store
-  (store-write [this name stream]
-    (swap! (:store this) assoc name (tobytes stream))
-    )
-  (store-read [this name]
+  ImageSource
+  (get-image-stream [this name]
     (if-let [b (get @(:store this) name)]
       (io/input-stream b))))
 

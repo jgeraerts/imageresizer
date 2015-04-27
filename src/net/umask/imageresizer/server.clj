@@ -11,7 +11,8 @@
   (start [this]
     (assoc this :server (httpkit/run-server (vhost-handler (:vhost this)) (:httpconfig this))))
   (stop [this]
-    ((:server this))))
+    (when (:server this) 
+      ((:server this)))))
 
 (defn create-server
   ([]

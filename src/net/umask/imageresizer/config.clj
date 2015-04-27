@@ -1,16 +1,24 @@
 (ns net.umask.imageresizer.config
-  (:require [net.umask.imageresizer.filestore :refer [create-filestore]]
+  (:require [net.umask.imageresizer.filestore :refer [create-filecache
+                                                      create-filesource]]
             [net.umask.imageresizer.resizer :refer [create-resizer]]
-            [net.umask.imageresizer.s3store :refer [create-s3store]]))
+            [net.umask.imageresizer.s3store :refer [create-s3cache
+                                                    create-s3source]]))
 
-(defn resizer [&{:keys [secret store]}]
-  (create-resizer secret store))
+(defn resizer [&{:keys [secret source cache]}]
+  (create-resizer secret source cache))
 
-(defn s3store [&{:keys [bucket cred]}]
-  (create-s3store bucket cred))
+(defn s3source [&{:keys [bucket cred]}]
+  (create-s3source bucket cred))
 
-(defn filestore [&{:keys [basedir]}]
-  (create-filestore basedir))
+(defn s3cache [&{:keys [bucket cred]}]
+  (create-s3cache bucket cred))
+
+(defn filesource [&{:keys [basedir]}]
+  (create-filesource basedir))
+
+(defn filecache [&{:keys [basedir]}]
+  (create-filecache basedir))
 
 (defn- vhost-alias [aliases app]
   (reduce #(assoc %1 %2 app) {} (if (vector? aliases) aliases [aliases])))

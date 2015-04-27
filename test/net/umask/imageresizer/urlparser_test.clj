@@ -1,24 +1,17 @@
 (ns net.umask.imageresizer.urlparser_test
-  (:require digest)
   (:require [net.umask.imageresizer.urlparser :refer :all]
             [clojure.test :refer :all]
             [ring.mock.request :refer :all]))
 
-(def ^:private secret "verysecret")
+(def ^:private handler (wrap-url-parser identity) )
 
-(def ^:private handler (wrap-url-parser secret identity) )
-
-(defn- calculate-checksum [url]
-  (digest/md5 (str secret url)))
-
-(defn- call-handler-with-correct-checksum [url]
-  (let [checksum (calculate-checksum url)]
-    (handler (request :get (str "/" checksum "/" url)))))
+(defn- call-handler [url]
+  (handler (request :get (str "/" url))))
 
 (deftest urlparsing
   (testing "check if imageresizer parameters are correctly parsed"
-    (are [x y] (= (assoc x :checksum (calculate-checksum y) :uri y)
-                  (:imageresizer  (call-handler-with-correct-checksum y)))
+    (are [x y] (= (assoc x :uri y)
+                  (:imageresizer  (call-handler y)))
          {:original "filename.jpg" 
           :size {:width 300
                  :height 400 }} "size/300x400/filename.jpg"
@@ -34,12 +27,4 @@
          {:original "foo/bar/original.jpg"
           :size {:height 400 :width 300 :color 0xFFEEDD}} "size/300x400-0xFFEEDD/foo/bar/original.jpg"))
 
-  (testing "an invalid checksum should result in status 400 bad request"
-    (let [result (handler (request :get "/invalidchecksum/size/300/original.jpg"))]
-      (is (= 400 (:status result))))
-    (let [result (handler (request :get "/invalidchecksum"))]
-      (is (= 400 (:status result))))
-    (let [result (handler (request :get "/invalidchecksum/"))]
-      (is (= 400 (:status result))))
-    (let [result (handler (request :get "/"))]
-      (is (= 400 (:status result))))))
+  )

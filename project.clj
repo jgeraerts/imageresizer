@@ -9,7 +9,8 @@
                  [http-kit "2.1.19"]
                  [netty-ring-adapter "0.4.6"]
                  [org.imgscalr/imgscalr-lib "4.2"]
-                 [clj-aws-s3 "0.3.10"]
+                 [clj-aws-s3 "0.3.10" :exclusions [commons-logging joda-time]]
+                 [joda-time/joda-time "2.7"]
                  [org.clojure/tools.cli "0.3.1"]
                  [com.stuartsierra/component "0.2.3"]
                  [ring "1.3.2"]
@@ -22,9 +23,8 @@
   :exclusions [commons-logging/commons-logging]
   :main net.umask.imageresizer
   :repl-options {:init-ns user}
-  :profiles {:dev {:dependencies [
-                                  [org.clojure/tools.namespace "0.2.10"]
-                                  [ring-mock "0.1.5"]
+  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.10"]
+                                  [ring/ring-mock "0.2.0"]
                                   [reloaded.repl "0.1.0"]]
                    :source-paths ["dev"]}})
 

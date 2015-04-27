@@ -1,9 +1,12 @@
 (ns net.umask.imageresizer.resizer
   (:require [clojure.java.io :as io]
-            [clojure.tools.logging :refer [debug info]]
+            [clojure.tools.logging :refer [debug warn]]
+            [net.umask.imageresizer.cache :refer [wrap-cache]]
+            [net.umask.imageresizer.checksum :refer [wrap-checksum]]
             [net.umask.imageresizer.image :as img]
-            [net.umask.imageresizer.store :refer :all]
+            [net.umask.imageresizer.source :refer [get-image-stream]]
             [net.umask.imageresizer.urlparser :refer :all]
+            [net.umask.imageresizer.bytebuffer :refer [wrap-bytebuffer]]
             [ring.util.response :refer [content-type header not-found
                                         response]])
   (:import (java.awt Color)
@@ -76,7 +79,7 @@
         new-image)
       img)))
 
-(defn- transform [^java.io.InputStream original options]
+(defn- transform #^bytes [^java.io.InputStream original options]
   (let [bos (java.io.ByteArrayOutputStream.)]
     (try 
       (-> (img/read original)
@@ -87,27 +90,27 @@
       (finally (.close original)))
     (.toByteArray bos)))
 
-(defn create-ring-handler [store]
+(defn create-ring-handler [source]
   (fn [request]
     (let [uri (subs (:uri request) 1)
           resizeroptions (:imageresizer request)
           originalname (:original resizeroptions)
-          original (store-read store originalname)
-          store? (not= originalname (:uri resizeroptions))] ;; dont store the original again, causes quality degradation
+          original (get-image-stream source originalname)] 
       (if (nil? original)
         (do
-          (info "image not found or checksum not valid for uri" uri)
+          (warn "image not found for uri" uri)
           (-> (not-found (str "original file " originalname " not found"))
               (content-type "text/plain")))
         (let [transformedimage (transform original resizeroptions)]
-          (when store?
-            (debug "storing image " (:uri resizeroptions) " to storage")
-            (store-write store (:uri resizeroptions) (io/input-stream transformedimage)))
-          (-> (response (io/input-stream transformedimage))
+          
+          (-> (response transformedimage)
               (content-type "image/jpeg")
               (header "Content-Length" (alength transformedimage))))))))
 
-(defn create-resizer [secret store]
-  {:store store
-   
-   :handler (wrap-url-parser secret (create-ring-handler store))})
+(defn create-resizer [secret source cache]
+  {:store source
+   :handler (->> (create-ring-handler source)
+                (wrap-cache cache)
+                (wrap-url-parser)
+                (wrap-checksum secret)
+                (wrap-bytebuffer))})
