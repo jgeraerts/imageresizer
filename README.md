@@ -6,7 +6,7 @@ Dynamic image resizing server
 
 ## Configuration
 
-The image server is configured through a `config.clj` file which is passed as argument. A sample configuration can be found in [sample-config.clj](../blob/master/sample-config.clj)
+The image server is configured through a `config.clj` file which is passed as argument. A sample configuration can be found in [sample-config.clj](../master/sample-config.clj)
 
 The configuration file has 2 global keys. `:http` specifies the port the server will be listening on. The `:vhosts` key is an vector containing all the virtual hosts of the server. Every virtual host definition is in the format `[alias1 alias2 alias3] (resizer <resizerconfiguration>`. Then the resizer should be configured with a `:secret` which is a key used to checksum the url's. The resizer also needs a `:store` where it should fetch the original images and where the cached versions are written to. Currenly following stores are supported:
 
@@ -44,7 +44,7 @@ size | $(size)h | this resizes the image by keeping the aspect ratio and `size` 
 size | $(width)wx$(height) | this resizes the image to the given dimensions of `width x height`. This crops the images from the center so to change the aspect ratio
 size | $(width)wx$(height)-0x$(rgbcolor) | this resizes the images to the given dimensions of `width x height` but instead of cropping from the center it pads the border with a color with rgb value `rgbcolor` to match the new aspect ratio. 
 
-The operations can be combined in multiple key value pairs. Check the unit tests for [examples] (../blob/master/test/net/umask/imageresizer/resizer_test.clj#L61) of urls. 
+The operations can be combined in multiple key value pairs. Check the unit tests for [examples] (../master/test/net/umask/imageresizer/resizer_test.clj#L61) of urls. 
 
 ## Copyright and License
 
