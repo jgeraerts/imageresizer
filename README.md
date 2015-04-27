@@ -44,7 +44,7 @@ size | $(size)h | this resizes the image by keeping the aspect ratio and `size` 
 size | $(width)wx$(height) | this resizes the image to the given dimensions of `width x height`. This crops the images from the center so to change the aspect ratio
 size | $(width)wx$(height)-0x$(rgbcolor) | this resizes the images to the given dimensions of `width x height` but instead of cropping from the center it pads the border with a color with rgb value `rgbcolor` to match the new aspect ratio. 
 
-The operations can be combined in multiple key value pairs. 
+The operations can be combined in multiple key value pairs. Check the unit tests for [examples] (../blob/master/test/net/umask/imageresizer/resizer_test.clj#L61) of urls. 
 
 ## Copyright and License
 
