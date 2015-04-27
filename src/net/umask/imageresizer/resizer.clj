@@ -85,7 +85,7 @@
           (crop (:crop options))
           (scale (:size options))
           (fill-alpha)
-          (img/write bos :quality 100))
+          (img/write bos :quality 90))
       (finally (.close original)))
     (.toByteArray bos)))
 

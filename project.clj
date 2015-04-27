@@ -3,8 +3,8 @@
   :url "https://github.com/jogeraerts/imageserver"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[com.twelvemonkeys.imageio/imageio-jpeg "3.0"]
-                 [com.twelvemonkeys.imageio/imageio-tiff "3.0"]
+  :dependencies [[com.twelvemonkeys.imageio/imageio-jpeg "3.0.1"]
+                 [com.twelvemonkeys.imageio/imageio-tiff "3.0.1"]
                  [org.clojure/clojure "1.6.0"]
                  [http-kit "2.1.19"]
                  [netty-ring-adapter "0.4.6"]
@@ -12,7 +12,7 @@
                  [clj-aws-s3 "0.3.10"]
                  [org.clojure/tools.cli "0.3.1"]
                  [com.stuartsierra/component "0.2.2"]
-                 [ring "1.3.1"]
+                 [ring "1.3.2"]
                  [digest "1.4.4"]
                  [org.clojure/tools.cli "0.3.1"]
                  [org.clojure/tools.logging "0.3.1"]
