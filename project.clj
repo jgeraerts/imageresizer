@@ -25,7 +25,8 @@
   :plugins [[cider/cider-nrepl "0.8.1"]]
   :profiles {:dev {:dependencies [
                                   [org.clojure/tools.namespace "0.2.10"]
-                                  [ring-mock "0.1.5"]]
+                                  [ring-mock "0.1.5"]
+                                  [reloaded.repl "0.1.0"]]
                    :source-paths ["dev"]}})
 
  
