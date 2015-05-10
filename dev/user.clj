@@ -13,15 +13,13 @@
    [clojure.test :as test]
    [com.stuartsierra.component :as component]
    [aws.sdk.s3 :as s3]
-   [digest]   
+   [digest]
+   [ring.middleware.params :refer :all]
    [net.umask.imageresizer.resizer :as resizer]
    [net.umask.imageresizer.memorystore :as memstore]
    [net.umask.imageresizer.server :as imgserver]
    [net.umask.imageresizer.store :as store]
-   [net.umask.imageresizer.s3store :as s3store])
-  (:use ring.middleware.params))
-
-
+   [net.umask.imageresizer.s3store :as s3store]))
   
 (def secret "verysecret")
 

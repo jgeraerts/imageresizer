@@ -1,8 +1,7 @@
 (ns net.umask.imageresizer.config
-  (:use [net.umask.imageresizer
-         [resizer :only [create-resizer]]
-         [s3store :only [create-s3store]]
-         [filestore :only [create-filestore]]]))
+  (:require [net.umask.imageresizer.filestore :refer [create-filestore]]
+            [net.umask.imageresizer.resizer :refer [create-resizer]]
+            [net.umask.imageresizer.s3store :refer [create-s3store]]))
 
 (defn resizer [&{:keys [secret store]}]
   (create-resizer secret store))

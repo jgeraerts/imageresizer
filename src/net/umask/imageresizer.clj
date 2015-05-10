@@ -1,12 +1,11 @@
 (ns net.umask.imageresizer
-  (:require [clojure.tools.cli :refer [parse-opts]]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [clojure.string :as string]
-            [com.stuartsierra.component :as component])
-  (:use [net.umask.imageresizer
-         [config :only [load-config]]
-         [server :only [create-server]]]
-        [clojure.tools.logging :only [info]])
+            [clojure.tools.cli :refer [parse-opts]]
+            [clojure.tools.logging :refer [info]]
+            [com.stuartsierra.component :as component]
+            [net.umask.imageresizer.config :refer [load-config]]
+            [net.umask.imageresizer.server :refer [create-server]])
   (:gen-class))
 
 (defn usage [options-summary]

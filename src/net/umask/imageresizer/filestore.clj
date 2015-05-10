@@ -1,8 +1,9 @@
 (ns net.umask.imageresizer.filestore
-  (:require [clojure.java.io :as io])
-  (:use net.umask.imageresizer.store))
+  (:require [clojure.java.io :as io]
+            [net.umask.imageresizer.store :refer :all])
+  (:import java.io.File))
 
-(defn getfile [ basedir name] 
+(defn ^File getfile ^java.io.File [ basedir name] 
     (io/file basedir name))
 
 (defrecord FileStore [basedir]

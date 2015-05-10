@@ -1,8 +1,8 @@
 (ns net.umask.imageresizer.urlparser_test
   (:require digest)
-  (:use net.umask.imageresizer.urlparser
-        clojure.test
-        ring.mock.request))
+  (:require [net.umask.imageresizer.urlparser :refer :all]
+            [clojure.test :refer :all]
+            [ring.mock.request :refer :all]))
 
 (def ^:private secret "verysecret")
 

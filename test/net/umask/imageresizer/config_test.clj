@@ -1,6 +1,6 @@
 (ns net.umask.imageresizer.config_test
-  (:use clojure.test
-        net.umask.imageresizer.config))
+  (:require [clojure.test :refer :all]
+            [net.umask.imageresizer.config :refer :all]))
 
 (deftest test-create-vhostmap
   (testing "test maps correctly transformed with vector single element"

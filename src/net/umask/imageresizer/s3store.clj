@@ -1,8 +1,8 @@
 (ns net.umask.imageresizer.s3store
   (:require [aws.sdk.s3 :as s3]
-            [clojure.java.io :as io])
-  (:use net.umask.imageresizer.store)
-  (:import com.amazonaws.AmazonServiceException))
+            [clojure.java.io :as io]
+            [net.umask.imageresizer.store :refer :all])
+  (:import (com.amazonaws AmazonServiceException)))
 
 (defrecord S3Store [bucket cred]
   Store

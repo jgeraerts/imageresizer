@@ -1,6 +1,6 @@
 (ns net.umask.imageresizer.server
-  (:use [net.umask.imageresizer.vhost :only [vhost-handler]])
   (:require [com.stuartsierra.component :as component]
+            [net.umask.imageresizer.vhost :refer [vhost-handler]]
             [org.httpkit.server :as httpkit]))
 
 

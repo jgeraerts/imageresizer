@@ -107,7 +107,7 @@
   [img angle]
   (Scalr/rotate img angle (make-array BufferedImageOp 0)))
 
-(defn scale
+(defn ^BufferedImage scale
   "Scales a BufferedImage and returns the result, also a BufferedImage. Leaves
   the original unmodified.
   

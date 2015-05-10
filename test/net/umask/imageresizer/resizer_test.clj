@@ -1,8 +1,8 @@
 (ns net.umask.imageresizer.resizer-test
-  (:use net.umask.imageresizer.resizer
-        clojure.test
-        ring.mock.request)
-  (:require [net.umask.imageresizer.memorystore :as memstore]
+  (:require [net.umask.imageresizer.resizer :refer :all]
+            [clojure.test :refer :all]
+            [ring.mock.request :refer :all]
+            [net.umask.imageresizer.memorystore :as memstore]
             [net.umask.imageresizer.store :as store]
             [clojure.java.io :as io]
             digest)

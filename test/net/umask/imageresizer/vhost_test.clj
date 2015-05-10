@@ -1,7 +1,7 @@
 (ns net.umask.imageresizer.vhost_test
+  (:require [ring.mock.request :refer :all])
   (:use [net.umask.imageresizer.vhost :only [vhost-handler]]
-        clojure.test
-        ring.mock.request))
+        clojure.test))
 
 (defn- app [request] {:uri (:uri request)})
 

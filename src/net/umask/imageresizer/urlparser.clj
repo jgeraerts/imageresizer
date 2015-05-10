@@ -1,8 +1,7 @@
 (ns net.umask.imageresizer.urlparser
-  (:use [clojure.string :only [join split]]
-        [clojure.tools.logging :only [warn trace]])
   (:require [clojure.edn :as edn]
-            digest))
+            [clojure.string :refer [join split]]
+            [clojure.tools.logging :refer [trace warn]]))
 
 (set! *warn-on-reflection* true)
 

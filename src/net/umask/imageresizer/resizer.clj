@@ -1,22 +1,20 @@
 (ns net.umask.imageresizer.resizer
-  (:use [clojure.string :only [split join]]
-        net.umask.imageresizer.store
-        net.umask.imageresizer.urlparser
-        [clojure.tools.logging :only [info debug]]
-        [ring.util.response :only [response not-found header content-type]])
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
+            [clojure.tools.logging :refer [debug info]]
             [net.umask.imageresizer.image :as img]
-            digest)
-  (:import [java.awt.image BufferedImage]
-           [java.awt Graphics Color]))
+            [net.umask.imageresizer.store :refer :all]
+            [net.umask.imageresizer.urlparser :refer :all]
+            [ring.util.response :refer [content-type header not-found
+                                        response]])
+  (:import (java.awt Color)
+           (java.awt.image BufferedImage)))
 
 (defmulti scale (fn [image size] (if-not (nil? size) (keys size))))
 
 (defmethod scale '(:size) [image {size :size}]
   (img/scale image :size size :fit :auto :method :ultra-quality :ops [:antialias]))
 
-(defmethod scale '(:color :height :width) [image {height :height width :width color :color}]
+(defmethod scale '(:color :height :width) [^BufferedImage image {height :height width :width color :color}]
   (let [img-width (.getWidth image)
         img-height (.getHeight image)
         fit (if (>= (/ height width) (/ img-height img-width))
@@ -63,7 +61,7 @@
     (img/rotate img angle)
     img))
 
-(defn- fill-alpha [img]
+(defn- fill-alpha [^BufferedImage img]
   (let [width (.getWidth img)
         height (.getHeight img)
         type (.getType img)]

@@ -1,9 +1,8 @@
 (ns net.umask.imageresizer.filestore_test
-   (:use net.umask.imageresizer.filestore
-          net.umask.imageresizer.store
-          clojure.test)
-   (:require [clojure.java.io :as io]
-             ))
+  (:require [net.umask.imageresizer.filestore :refer :all]
+            [net.umask.imageresizer.store :refer :all]
+            [clojure.test :refer :all]
+            [clojure.java.io :as io]))
 
 (deftest filestore
   (let [tempdir (java.io.File/createTempFile "filestorebasedir" "")

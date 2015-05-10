@@ -1,8 +1,7 @@
 (ns net.umask.imageresizer.memorystore
-  (:require [com.stuartsierra.component :as component]
-            [clojure.java.io :as io])
-  (:use net.umask.imageresizer.store)
-  (:import  java.io.ByteArrayOutputStream))
+  (:require [clojure.java.io :as io]
+            [net.umask.imageresizer.store :refer :all])
+  (:import (java.io ByteArrayOutputStream)))
 
 (defn- tobytes [stream]
   (let [bos (ByteArrayOutputStream.)]
