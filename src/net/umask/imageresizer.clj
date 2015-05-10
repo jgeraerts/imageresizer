@@ -40,9 +40,9 @@
           c (load-config config)
           http-config (:httpconfig c)
           vhosts (:vhosts c)]
-      (do  (component/start
-            (component/system-map
-             :vhost vhosts
-             :server (component/using (create-server http-config) [:vhost])))
-           (info "Server started. Listening on port" (get-in http-config [:port]))
-           nil))))
+      (component/start
+       (component/system-map
+        :vhost vhosts
+        :server (component/using (create-server http-config) [:vhost])))
+      (info "Server started. Listening on port" (get-in http-config [:port]))
+      nil)))

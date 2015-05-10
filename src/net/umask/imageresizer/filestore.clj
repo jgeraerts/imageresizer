@@ -12,8 +12,8 @@
     (let [f (getfile (:basedir this) name)
           parent (.getParentFile f)
           parent-exists? (.exists parent)]
-      (do  (if (not parent-exists?) (.mkdirs parent))
-           (io/copy stream (getfile (:basedir this) name)))))
+      (if (not parent-exists?) (.mkdirs parent))
+      (io/copy stream (getfile (:basedir this) name))))
 
   (store-read [this name]
     (io/input-stream (getfile (:basedir this) name))))

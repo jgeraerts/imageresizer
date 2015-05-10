@@ -30,8 +30,7 @@
 (defn create-test-system []
   (let [mstore (memstore/create-memstore)
         rose (io/input-stream (io/resource "rose.jpg"))]
-    (do
-      (store/store-write mstore "rose.jpg" rose))
+    (store/store-write mstore "rose.jpg" rose)
     (component/system-map
      :vhost {"localhost" (resizer/create-resizer secret mstore)}
      :server  (component/using  (imgserver/create-server) [:vhost]))))

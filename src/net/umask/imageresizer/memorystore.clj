@@ -5,8 +5,7 @@
 
 (defn- tobytes [stream]
   (let [bos (ByteArrayOutputStream.)]
-    (do
-      (io/copy stream bos))
+    (io/copy stream bos)
     (.toByteArray bos)))
 
 (defrecord MemoryStore [store]

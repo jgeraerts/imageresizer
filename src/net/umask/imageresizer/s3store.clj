@@ -20,8 +20,7 @@
     (try 
       (:content (s3/get-object (:cred this) (:bucket this) name))
       (catch AmazonServiceException e
-        (if (= 404 (.getStatusCode e))
-          nil
+        (when-not (= 404 (.getStatusCode e))
           (throw e))))))
 
 (defn create-s3store [bucket cred]

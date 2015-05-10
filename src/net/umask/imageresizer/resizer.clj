@@ -30,12 +30,12 @@
         resized-image-width  (.getWidth resized-image)
         x (/ (- width resized-image-width) 2)
         y (/ (- height resized-image-height) 2)]
-    (do (doto graphics
-          (.setColor  color)
-          (.fillRect 0 0 width height)
-          (.drawImage resized-image x y nil)
-          (.dispose))
-        new-image)))
+    (doto graphics
+      (.setColor  color)
+      (.fillRect 0 0 width height)
+      (.drawImage resized-image x y nil)
+      (.dispose))
+    new-image))
 
 (defmethod scale '(:height :width) [image {width :width height :height}]
   (img/scale image :width width :height height :fit :crop :method :ultra-quality :ops [:antialias]))
@@ -57,7 +57,7 @@
 
 (defn- rotate
   [img {angle :angle}]
-  (if (not (nil? angle))
+  (if-not (nil? angle)
     (img/rotate img angle)
     img))
 
@@ -68,12 +68,12 @@
     (if (= BufferedImage/TYPE_INT_ARGB type)
       (let [new-image (BufferedImage. width height BufferedImage/TYPE_INT_RGB)
             graphics (.getGraphics new-image)]
-        (do  (doto graphics
-               (.setColor Color/WHITE)
-               (.fillRect 0 0 width height)
-               (.drawImage img 0 0 nil)
-               (.dispose))
-             new-image))
+        (doto graphics
+          (.setColor Color/WHITE)
+          (.fillRect 0 0 width height)
+          (.drawImage img 0 0 nil)
+          (.dispose))
+        new-image)
       img)))
 
 (defn- transform [^java.io.InputStream original options]
