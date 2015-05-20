@@ -1,5 +1,6 @@
 (ns net.umask.imageresizer.config
-  (:require [net.umask.imageresizer.filestore :refer [create-filecache
+  (:require [net.umask.imageresizer.httpsource :refer [create-httpsource]]
+            [net.umask.imageresizer.filestore :refer [create-filecache
                                                       create-filesource]]
             [net.umask.imageresizer.resizer :refer [create-resizer]]
             [net.umask.imageresizer.s3store :refer [create-s3cache
@@ -19,6 +20,9 @@
 
 (defn filecache [&{:keys [basedir]}]
   (create-filecache basedir))
+
+(defn httpsource [& {:keys [url] :as rest}]
+  (apply create-httpsource url (mapcat seq rest)))
 
 (defn- vhost-alias [aliases app]
   (reduce #(assoc %1 %2 app) {} (if (vector? aliases) aliases [aliases])))
