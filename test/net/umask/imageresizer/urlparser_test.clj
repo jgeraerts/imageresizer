@@ -25,6 +25,4 @@
          {:original "foo/bar/original.jpg"
           :size {:height 300}} "size/300h/foo/bar/original.jpg"
          {:original "foo/bar/original.jpg"
-          :size {:height 400 :width 300 :color 0xFFEEDD}} "size/300x400-0xFFEEDD/foo/bar/original.jpg"))
-
-  )
+          :size {:height 400 :width 300 :color 0xFFEEDD}} "size/300x400-0xFFEEDD/foo/bar/original.jpg")))
