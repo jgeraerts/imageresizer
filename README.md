@@ -9,17 +9,17 @@ Dynamic image resizing server
 The image server is configured through a `config.clj` file which is passed as argument. The sample configuration shown below can be found in the repository [sample-config.clj](../master/sample-config.clj). 
 
 
-```
+```clojure
 (defconfig
   :http {:port 8080}
   :vhosts [["localhost"
             "127.0.0.1"] (resizer :secret "verysecret"
-                                              :source (s3source :bucket "bucketname"
-                                                                :cred {:endpoint "<endpoint goes here>"
-                                                                       ; example https://s3-eu-west-1.amazonaws.com  
-                                                                       :access-key "<access key goes here>"
-                                                                       :secret-key "<secret key goes here>"})
-                                              :cache (filecache :basedir "/var/lib/imgcache"))
+                                  :source (s3source :bucket "bucketname"
+                                                     :cred {:endpoint "<endpoint goes here>"
+                                                            ; example https://s3-eu-west-1.amazonaws.com  
+                                                            :access-key "<access key goes here>"
+                                                            :secret-key "<secret key goes here>"})
+                                  :cache (filecache :basedir "/var/lib/imgcache"))
             ["some.other.domain.tld"
              "some.alias.domain.tld"] (resizer :secret "alsoverysecret"
                                                :source (httpsource :url "http://u.r.l/basepath/"
@@ -40,13 +40,13 @@ Currently there are 3 types of sources and 2 types of caches.
 
 ## File source
 
-```
+```clojure
 (filesource :basedir "/path/to/images")
 ```
 
 ## S3 source
 
-```
+```clojure
 (s3source :bucket "bucketname"
           :cred {:endpoint "<endpoint goes here>"
                  ; example https://s3-eu-west-1.amazonaws.com  
@@ -56,7 +56,7 @@ Currently there are 3 types of sources and 2 types of caches.
 
 ## Http source
 
-```
+```clojure
 (httpsource :url "http://u.r.l/basepath/"
             :rewrite {:fromregex #"^([0-9a-zA-Z]{160})\.jpg$"
                       :replacement "/medias/ignore.jpg?context=$1"})
@@ -66,7 +66,7 @@ The `:rewrite` option can be used to rewrite the path of the original image as s
 
 ## S3 cache
 
-```
+```clojure
 (s3cache  :bucket "bucketname"
           :cred {:endpoint "<endpoint goes here>"
                  ; example https://s3-eu-west-1.amazonaws.com  
@@ -76,7 +76,7 @@ The `:rewrite` option can be used to rewrite the path of the original image as s
 
 ## File Cache
 
-```
+```clojure
 (filecache :basedir "/var/lib/imgcache")
 ```
 
