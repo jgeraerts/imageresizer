@@ -12,12 +12,12 @@
   (:import (java.awt Color)
            (java.awt.image BufferedImage)))
 
-(defmulti scale (fn [image size] (if-not (nil? size) (keys size))))
+(defmulti scale (fn [image size] (into #{} (keys size))))
 
-(defmethod scale '(:size) [image {size :size}]
+(defmethod scale #{:size} [image {size :size}]
   (img/scale image :size size :fit :auto :method :ultra-quality :ops [:antialias]))
 
-(defmethod scale '(:color :height :width) [^BufferedImage image {height :height width :width color :color}]
+(defmethod scale #{:color :height :width} [^BufferedImage image {height :height width :width color :color}]
   (let [img-width (.getWidth image)
         img-height (.getHeight image)
         fit (if (>= (/ height width) (/ img-height img-width))
@@ -40,17 +40,17 @@
       (.dispose))
     new-image))
 
-(defmethod scale '(:height :width) [image {width :width height :height}]
+(defmethod scale #{:height :width} [image {width :width height :height}]
   (img/scale image :width width :height height :fit :crop :method :ultra-quality :ops [:antialias]))
 
-(defmethod scale '(:height) [image {height :height}]
+(defmethod scale #{:height} [image {height :height}]
   (img/scale image :size height :fit :height :method :ultra-quality :ops [:antialias]))
 
-(defmethod scale '(:width) [image {width :width}]
+(defmethod scale #{:width} [image {width :width}]
   (debug "scaling to width " width)
   (img/scale image :size width :fit :width :method :ultra-quality :ops [:antialias]))
 
-(defmethod scale nil [image size] image)
+(defmethod scale :default [image size] image)
 
 (defn- crop
   [i {x :x y :y width :width height :height}]

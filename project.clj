@@ -5,7 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[com.twelvemonkeys.imageio/imageio-jpeg "3.1.0"]
                  [com.twelvemonkeys.imageio/imageio-tiff "3.1.0"]
-                 [org.clojure/clojure "1.6.0"]
+                 [org.clojure/clojure "1.7.0"]
                  [http-kit "2.1.19"]
                  [netty-ring-adapter "0.4.6"]
                  [org.imgscalr/imgscalr-lib "4.2"]
