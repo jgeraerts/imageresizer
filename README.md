@@ -6,15 +6,79 @@ Dynamic image resizing server
 
 ## Configuration
 
-The image server is configured through a `config.clj` file which is passed as argument. A sample configuration can be found in [sample-config.clj](../master/sample-config.clj)
+The image server is configured through a `config.clj` file which is passed as argument. The sample configuration shown below can be found in the repository [sample-config.clj](../master/sample-config.clj). 
 
-The configuration file has 2 global keys. `:http` specifies the port the server will be listening on. The `:vhosts` key is an vector containing all the virtual hosts of the server. Every virtual host definition is in the format `[alias1 alias2 alias3] (resizer <resizerconfiguration>`. Then the resizer should be configured with a `:secret` which is a key used to checksum the url's. The resizer also needs a `:store` where it should fetch the original images and where the cached versions are written to. Currenly following stores are supported:
 
-## File store
-<tbd>
+```
+(defconfig
+  :http {:port 8080}
+  :vhosts [["localhost"
+            "127.0.0.1"] (resizer :secret "verysecret"
+                                              :source (s3source :bucket "bucketname"
+                                                                :cred {:endpoint "<endpoint goes here>"
+                                                                       ; example https://s3-eu-west-1.amazonaws.com  
+                                                                       :access-key "<access key goes here>"
+                                                                       :secret-key "<secret key goes here>"})
+                                              :cache (filecache :basedir "/var/lib/imgcache"))
+            ["some.other.domain.tld"
+             "some.alias.domain.tld"] (resizer :secret "alsoverysecret"
+                                               :source (httpsource :url "http://u.r.l/basepath/"
+                                                                   :rewrite {:fromregex #"^([0-9a-zA-Z]{160})\.jpg$"
+                                                                             :replacement "/medias/ignore.jpg?context=$1"})
+                                               :cache (s3cache :bucket "cache"
+                                                               :cred {:endpoint "<endpoint goes here>"
+                                                                       ; example https://s3-eu-west-1.amazonaws.com  
+                                                                       :access-key "<access key goes here>"
+                                                                       :secret-key "<secret key goes here>"}))])
+```
 
-## S3 Store
-<tbd>
+The configuration file has 2 global keys. `:http` specifies the port the server will be listening on. The `:vhosts` key is an vector containing all the virtual hosts of the server. Every virtual host definition is in the format `[alias1 alias2 alias3] (resizer <resizerconfiguration>`.
+
+The resizer is configured with a `:secret` which is used to validate the checksum. Then a resizer needs a `:source` and a `:cache`. A `:source` is used as a source of images that need to be resized. A `:cache` in its turn is used to write the resized images to. When a request for a resized images is found in the cache, the cached result is returned.
+
+Currently there are 3 types of sources and 2 types of caches.
+
+## File source
+
+```
+(filesource :basedir "/path/to/images")
+```
+
+## S3 source
+
+```
+(s3source :bucket "bucketname"
+          :cred {:endpoint "<endpoint goes here>"
+                 ; example https://s3-eu-west-1.amazonaws.com  
+                 :access-key "<access key goes here>"
+                 :secret-key "<secret key goes here>"})
+```
+
+## Http source
+
+```
+(httpsource :url "http://u.r.l/basepath/"
+            :rewrite {:fromregex #"^([0-9a-zA-Z]{160})\.jpg$"
+                      :replacement "/medias/ignore.jpg?context=$1"})
+```
+
+The `:rewrite` option can be used to rewrite the path of the original image as seen by the imageresizer to another path on the http endpoint.
+
+## S3 cache
+
+```
+(s3cache  :bucket "bucketname"
+          :cred {:endpoint "<endpoint goes here>"
+                 ; example https://s3-eu-west-1.amazonaws.com  
+                 :access-key "<access key goes here>"
+                 :secret-key "<secret key goes here>"})
+```
+
+## File Cache
+
+```
+(filecache :basedir "/var/lib/imgcache")
+```
 
 ## Starting the server
 
