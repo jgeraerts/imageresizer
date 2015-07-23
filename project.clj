@@ -26,6 +26,7 @@
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.10"]
                                   [ring/ring-mock "0.2.0"]
                                   [reloaded.repl "0.1.0"]]
-                   :source-paths ["dev"]}})
+                   :source-paths ["dev"]}
+             :1.8 {:dependencies [[org.clojure/clojure "1.8.0-alpha2"]]}})
 
  
