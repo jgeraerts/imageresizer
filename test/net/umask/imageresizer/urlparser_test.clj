@@ -25,4 +25,7 @@
          {:original "foo/bar/original.jpg"
           :size {:height 300}} "size/300h/foo/bar/original.jpg"
          {:original "foo/bar/original.jpg"
-          :size {:height 400 :width 300 :color 0xFFEEDD}} "size/300x400-0xFFEEDD/foo/bar/original.jpg")))
+          :size {:height 400 :width 300 :color 0xFFEEDD}} "size/300x400-0xFFEEDD/foo/bar/original.jpg"
+         {:crop {:x 10, :y 10, :width 10, :height 10}
+          :size {:size 10},
+          :original "foo.jpg"} "crop/10x10x10x10/size/10/foo.jpg")))
