@@ -21,7 +21,7 @@
 
 (defn- memory-store []
   (let [mstore (memstore/create-memstore)]
-    (doseq [i ["rose.jpg" "portrait.jpg" "landscape.jpg" "rose-cmyk.tiff" "rose-cmyk.jpg"]]
+    (doseq [i ["rose.jpg" "portrait.jpg" "landscape.jpg" "rose-cmyk.tiff" "rose-cmyk.jpg" "tux.png"]]
       (add-to-store mstore i))
     mstore))
 
@@ -49,36 +49,40 @@
     [status size]))
 
 (deftest test-resizer
-  (are [result uri] (= result (run-resizer uri))
-       [200 [225 300] ] "size/300/portrait.jpg"
-       [200 [300 225] ] "size/300/landscape.jpg"
-       [200 [200 200] ] "size/200x200/portrait.jpg"
-       [200 [200 200] ] "size/200x200/landscape.jpg"
-       [200 [100 200] ] "size/100x200/portrait.jpg"
-       [200 [100 200] ] "size/100x200/landscape.jpg"
-       [200 [100 125] ] "size/100x125/portrait.jpg" 
-       [200 [100 125] ] "size/100x125/landscape.jpg"
-       [200 [125 100] ] "size/125x100/portrait.jpg" 
-       [200 [125 100] ] "size/125x100/landscape.jpg"
-       [200 [100 133] ] "size/100x133/portrait.jpg" 
-       [200 [100 133] ] "size/100x133/landscape.jpg"
-       [200 [133 100] ] "size/133x100/portrait.jpg" 
-       [200 [133 100] ] "size/133x100/landscape.jpg"
-       [200 [200 100] ] "size/200x100/portrait.jpg"
-       [200 [200 100] ] "size/200x100/landscape.jpg"
-       [200 [200 200] ] "crop/20x20x200x200/portrait.jpg"
-       [200 [200 200] ] "crop/20x20x200x200/landscape.jpg"
-       [200 [100 100] ] "crop/20x20x200x200/size/100/portrait.jpg"
-       [200 [100 100] ] "crop/20x20x200x200/size/100/landscape.jpg"
-       [200 [200 267] ] "size/200w/portrait.jpg"
-       [200 [200 150] ] "size/200w/landscape.jpg"
-       [200 [150 200] ] "size/200h/portrait.jpg"
-       [200 [267 200] ] "size/200h/landscape.jpg"
-       [200 [200 200] ] "size/200x200-0xDDDDDD/portrait.jpg"
-       [200 [200 200] ] "size/200x200-0xDDDDDD/landscape.jpg"
-       [200 [200 200] ] "size/200x200/rose.jpg"
-       [200 [200 200] ] "size/200x200/rose-cmyk.jpg"
-       [200 [200 200] ] "size/200x200/rose-cmyk.tiff"))
+  (testing "testing different sizes/crops"
+    (are [result uri] (= result (run-resizer uri))
+      [200 [225 300] ] "size/300/portrait.jpg"
+      [200 [300 225] ] "size/300/landscape.jpg"
+      [200 [200 200] ] "size/200x200/portrait.jpg"
+      [200 [200 200] ] "size/200x200/landscape.jpg"
+      [200 [100 200] ] "size/100x200/portrait.jpg"
+      [200 [100 200] ] "size/100x200/landscape.jpg"
+      [200 [100 125] ] "size/100x125/portrait.jpg" 
+      [200 [100 125] ] "size/100x125/landscape.jpg"
+      [200 [125 100] ] "size/125x100/portrait.jpg" 
+      [200 [125 100] ] "size/125x100/landscape.jpg"
+      [200 [100 133] ] "size/100x133/portrait.jpg" 
+      [200 [100 133] ] "size/100x133/landscape.jpg"
+      [200 [133 100] ] "size/133x100/portrait.jpg" 
+      [200 [133 100] ] "size/133x100/landscape.jpg"
+      [200 [200 100] ] "size/200x100/portrait.jpg"
+      [200 [200 100] ] "size/200x100/landscape.jpg"
+      [200 [200 200] ] "crop/20x20x200x200/portrait.jpg"
+      [200 [200 200] ] "crop/20x20x200x200/landscape.jpg"
+      [200 [100 100] ] "crop/20x20x200x200/size/100/portrait.jpg"
+      [200 [100 100] ] "crop/20x20x200x200/size/100/landscape.jpg"
+      [200 [200 267] ] "size/200w/portrait.jpg"
+      [200 [200 150] ] "size/200w/landscape.jpg"
+      [200 [150 200] ] "size/200h/portrait.jpg"
+      [200 [267 200] ] "size/200h/landscape.jpg"
+      [200 [200 200] ] "size/200x200-0xDDDDDD/portrait.jpg"
+      [200 [200 200] ] "size/200x200-0xDDDDDD/landscape.jpg"))
+  (testing "testing different input formats"
+    (are [result uri] (= result (run-resizer uri))
+      [200 [200 200] ] "size/200x200/rose.jpg"
+      [200 [200 200] ] "size/200x200/rose-cmyk.jpg"
+      [200 [200 200] ] "size/200x200/rose-cmyk.tiff"
+      [200 [200 200] ] "size/200x200/tux.png")))
 
 (deftest test-non-existing-image
   (let [secret "secret"
