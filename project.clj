@@ -25,8 +25,7 @@
   :repl-options {:init-ns user}
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.10"]
                                   [ring/ring-mock "0.3.0"]
-                                  [reloaded.repl "0.2.1"]]
+                                  [reloaded.repl "0.2.1"]
+                                  [org.clojure/tools.trace "0.7.9"]]
                    :source-paths ["dev"]}
              :1.8 {:dependencies [[org.clojure/clojure "1.8.0-RC3"]]}})
-
- 

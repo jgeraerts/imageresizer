@@ -1,116 +1,140 @@
 (ns net.umask.imageresizer.resizer
   (:require [clojure.java.io :as io]
             [clojure.tools.logging :refer [debug warn]]
+            [net.umask.imageresizer.bufferedimage :refer [buffered-image new-buffered-image dimensions]]
+            [net.umask.imageresizer.bytebuffer :refer [wrap-bytebuffer]]
             [net.umask.imageresizer.cache :refer [wrap-cache]]
             [net.umask.imageresizer.checksum :refer [wrap-checksum]]
+            [net.umask.imageresizer.graphics :refer [with-graphics]]
             [net.umask.imageresizer.image :as img]
             [net.umask.imageresizer.source :refer [get-image-stream]]
             [net.umask.imageresizer.urlparser :refer :all]
-            [net.umask.imageresizer.bytebuffer :refer [wrap-bytebuffer]]
+            [net.umask.imageresizer.watermark :refer [watermark]]
             [ring.util.response :refer [content-type header not-found
                                         response]])
   (:import (java.awt Color)
            (java.awt.image BufferedImage)))
 
-(defmulti scale (fn [image size] (into #{} (keys size))))
+(defn- all-not-nil? [ vals ]
+  (every? (comp not nil?) vals))
 
-(defmethod scale #{:size} [image {size :size}]
-  (img/scale image :size size :fit :auto :method :ultra-quality :ops [:antialias]))
+(defmulti scale (fn [_ size] (into #{} (keys size))))
 
-(defmethod scale #{:color :height :width} [^BufferedImage image {height :height width :width color :color}]
-  (let [img-width (.getWidth image)
-        img-height (.getHeight image)
+(defmethod scale #{:size} [i {size :size}]
+  (img/scale i :size size :fit :auto :method :ultra-quality :ops [:antialias]))
+
+(defmethod scale #{:color :height :width} [^BufferedImage i {height :height width :width color :color}]
+  (debug "scaling to (" width "," height ") color " color)
+  (let [{img-width :width img-height :height} (dimensions i)
         fit (if (>= (/ height width) (/ img-height img-width))
               :width
               :height)
-        resized-image (img/scale image
+        resized-image (img/scale i
                                  :width width
                                  :height height :fit fit :method :ultra-quality :ops [:antialias])
-        color (Color. color)
-        new-image (BufferedImage. width height BufferedImage/TYPE_INT_RGB)
-        graphics (.getGraphics new-image)
-        resized-image-height (.getHeight resized-image)
-        resized-image-width  (.getWidth resized-image)
+        {resized-image-height :height resized-image-width :width} (dimensions resized-image)
         x (/ (- width resized-image-width) 2)
-        y (/ (- height resized-image-height) 2)]
-    (doto graphics
-      (.setColor  color)
-      (.fillRect 0 0 width height)
-      (.drawImage resized-image x y nil)
-      (.dispose))
-    new-image))
+        y (/ (- height resized-image-height) 2)
+         ]
+    (with-graphics (new-buffered-image width height :rgb)
+                  (.setColor  (Color. color))
+                  (.fillRect 0 0 width height)
+                  (.drawImage resized-image x y nil))))
 
-(defmethod scale #{:height :width} [image {width :width height :height}]
-  (img/scale image :width width :height height :fit :crop :method :ultra-quality :ops [:antialias]))
+(defmethod scale #{:height :width} [i {width :width height :height}]
+  (img/scale i :width width :height height :fit :crop :method :ultra-quality :ops [:antialias]))
 
-(defmethod scale #{:height} [image {height :height}]
-  (img/scale image :size height :fit :height :method :ultra-quality :ops [:antialias]))
+(defmethod scale #{:height} [i {height :height}]
+  (img/scale i :size height :fit :height :method :ultra-quality :ops [:antialias]))
 
-(defmethod scale #{:width} [image {width :width}]
+(defmethod scale #{:width} [i {width :width}]
   (debug "scaling to width " width)
-  (img/scale image :size width :fit :width :method :ultra-quality :ops [:antialias]))
+  (img/scale i :size width :fit :width :method :ultra-quality :ops [:antialias]))
 
 (defmethod scale :default [image size] image)
 
 (defn- crop
   [i {x :x y :y width :width height :height}]
-  (if (every? (comp not nil?) [x y width height])
+  (if (all-not-nil? [x y width height])
     (img/crop i x y width height)
     i))
 
 (defn- rotate
-  [img {angle :angle}]
+  [i {angle :angle}]
   (if-not (nil? angle)
-    (img/rotate img angle)
-    img))
+    (img/rotate i angle)
+    i))
 
-(defn- fill-alpha [^BufferedImage img]
-  (let [width (.getWidth img)
-        height (.getHeight img)
-        type (.getType img)]
+(defn- fill-alpha [^BufferedImage i]
+  (let [{width :width height :height} (dimensions i)
+        type (.getType i)]
     (if (= BufferedImage/TYPE_INT_ARGB type)
-      (let [new-image (BufferedImage. width height BufferedImage/TYPE_INT_RGB)
-            graphics (.getGraphics new-image)]
-        (doto graphics
-          (.setColor Color/WHITE)
-          (.fillRect 0 0 width height)
-          (.drawImage img 0 0 nil)
-          (.dispose))
-        new-image)
-      img)))
+      (with-graphics (new-buffered-image width height :rgb)
+        (.setColor Color/WHITE)
+        (.fillRect 0 0 width height)
+        (.drawImage i 0 0 nil))
+      i)))
 
-(defn- transform #^bytes [^java.io.InputStream original options]
+(defn- addwatermark
+  [^BufferedImage i watermarksource {watermarkname :watermark :as options}]
+  (if (all-not-nil? [watermark watermarksource])
+    (let [watermark-img (get-image-stream watermarksource watermarkname)]      
+      (if-not (nil? watermark-img)
+        (watermark i (buffered-image watermark-img) options)
+        i))
+    i))
+
+(defn to-jpg [^BufferedImage i]
   (let [bos (java.io.ByteArrayOutputStream.)]
-    (try 
-      (-> (img/read original)
-          (crop (:crop options))
-          (scale (:size options))
-          (fill-alpha)
-          (img/write bos :quality 90))
-      (finally (.close original)))
+    (img/write i  bos :quality 90)
     (.toByteArray bos)))
 
-(defn create-ring-handler [source]
+(defn- wrap-transform [trans-fn handler]
   (fn [request]
-    (let [uri (subs (:uri request) 1)
-          resizeroptions (:imageresizer request)
-          originalname (:original resizeroptions)
-          original (get-image-stream source originalname)] 
-      (if (nil? original)
-        (do
-          (warn "image not found for uri" uri)
-          (-> (not-found (str "original file " originalname " not found"))
-              (content-type "text/plain")))
-        (let [transformedimage (transform original resizeroptions)]
-          
-          (-> (response transformedimage)
-              (content-type "image/jpeg")
-              (header "Content-Length" (alength transformedimage))))))))
+    (let [{:keys [body status] :as response} (handler request)]
+      (if (= 200 status)
+        (assoc response :body (trans-fn body request))
+        response))))
 
-(defn create-resizer [secret source cache]
-  {:store source
-   :handler (->> (create-ring-handler source)
-                (wrap-cache cache)
-                (wrap-url-parser)
-                (wrap-checksum secret)
-                (wrap-bytebuffer))})
+(defn wrap-output [handler]
+  (wrap-transform (fn [body request] (to-jpg body)) handler))
+
+(defn wrap-fill [handler]
+  (wrap-transform (fn [body request] (fill-alpha body)) handler))
+
+(defn wrap-scale [handler]
+  (wrap-transform (fn [body request] (scale body (get-in request [:imageresizer :size]))) handler))
+
+(defn wrap-crop [handler]
+  (wrap-transform (fn [body request] (crop body (get-in request [:imageresizer :crop]))) handler))
+
+(defn wrap-watermark [watermarks handler]
+  (wrap-transform (fn [body request ]
+                    (addwatermark body
+                                  watermarks
+                                  (get-in request [:imageresizer :watermark]))) handler))
+
+(defn load-source [source]
+  (fn [request]
+    (let [source-image-name (get-in request [:imageresizer :original])
+          source-image      (get-image-stream source source-image-name)]
+      (if-not (nil? source-image)
+        (response (buffered-image source-image))
+        (do
+          (warn "image not found for uri" (:uri request))
+          (-> (not-found (str "original file " source-image-name " not found"))
+              (content-type "text/plain")))))))
+
+
+(defn create-resizer [secret originals watermarks cache]
+  {:store originals
+   :handler (->> (load-source originals)
+                 (wrap-watermark watermarks)
+                 (wrap-crop)
+                 (wrap-scale)
+                 (wrap-fill)
+                 (wrap-output)
+                 (wrap-cache cache)
+                 (wrap-url-parser)
+                 (wrap-checksum secret)
+                 (wrap-bytebuffer))})

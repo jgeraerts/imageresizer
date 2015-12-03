@@ -2,17 +2,30 @@
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
             [ring.mock.request :refer :all]
+            [net.umask.imageresizer.graphics :refer [with-graphics]]
+            [net.umask.imageresizer.bufferedimage :refer [new-buffered-image dimensions]]
             [net.umask.imageresizer.resizer :refer :all]
             [net.umask.imageresizer.urlparser :refer [wrap-url-parser]]
             [net.umask.imageresizer.memorystore :as memstore]
             [net.umask.imageresizer.store :as store]
-            [net.umask.imageresizer.cache :refer [CacheProtocol wrap-cache]])
+            [net.umask.imageresizer.cache :refer [CacheProtocol wrap-cache]]
+            [net.umask.imageresizer.testutils :refer :all])
   (:import java.io.InputStream
            java.awt.image.BufferedImage
+           java.awt.Color
            javax.imageio.ImageIO))
 
-(defn- create-handler [mstore]
-  (->> (create-ring-handler mstore)
+(def ^:const http-ok 200)
+(def ^:const white-rgb (.getRGB Color/WHITE))
+(def ^:const red-rgb (.getRGB Color/RED))
+
+(defn- create-handler [mstore watermarkstore]
+  (->> (load-source mstore)
+       (wrap-watermark watermarkstore)
+       (wrap-crop)
+       (wrap-scale)
+       (wrap-fill)
+       (wrap-output)
        (wrap-url-parser)))
 
 (defn- add-to-store [mstore resource]
@@ -21,7 +34,7 @@
 
 (defn- memory-store []
   (let [mstore (memstore/create-memstore)]
-    (doseq [i ["rose.jpg" "portrait.jpg" "landscape.jpg" "rose-cmyk.tiff" "rose-cmyk.jpg" "tux.png"]]
+    (doseq [i ["rose.jpg" "portrait.jpg" "landscape.jpg" "rose-cmyk.tiff" "rose-cmyk.jpg" "tux.png" "watermark.png"]]
       (add-to-store mstore i))
     mstore))
 
@@ -29,6 +42,34 @@
   (try (let [image (ImageIO/read (io/input-stream blob))]
          [(.getWidth image) (.getHeight image)])
        (catch Throwable e [0 0])))
+
+(defn- test-handler [response image]
+  (fn [request]
+    {:status response
+     :body image}))
+
+(defn- colorfreq [img]
+  (let [dim (dimensions img)
+        rgbvalues (for [x (range 0 (:width  dim))
+                        y (range 0 (:height dim))]
+                    (.getRGB img x y))]
+    (frequencies rgbvalues)))
+
+(deftest test-scale-wrapper
+  (letfn [(run-scale [imgw imgh scaleopts] (:body ((wrap-scale
+                                                    (test-handler http-ok
+                                                                  (generate-test-image imgw imgh)))
+                                                   {:imageresizer {:size scaleopts}})))]
+    (testing "testing different sizing options"
+      (are [result imgw imgh scaleopts] (= result (dimensions (run-scale imgw imgh scaleopts)))
+        {:width 100 :height 50  } 200 100 {:size 100}
+        {:width 50  :height 100 } 100 200 {:size 100}
+        {:width 100 :height 50  } 200 100 {:width 100}
+        {:width 100 :height 200 } 100 200 {:width 100}))
+    (testing "check if colors are correct"
+      (are [result imgw imgh scaleopts] (= result (colorfreq (run-scale imgw imgh scaleopts)))
+        {white-rgb 5000} 200 100 {:size 100}
+        {white-rgb 1250 red-rgb 1250} 200 100 {:width 50 :height 50 :color red-rgb}))))
 
 (defn- run-resizer
   "Runs the resizer with a specific uri returns the result as a vector in the form as
@@ -41,7 +82,7 @@
 
   [uri]
   (let [mstore (memory-store)
-        handler (create-handler mstore )
+        handler (create-handler mstore mstore)
         resized (handler (request :get (str "/" uri)))
         status (:status resized)
         size (getsize (:body resized))
@@ -76,7 +117,8 @@
       [200 [150 200] ] "size/200h/portrait.jpg"
       [200 [267 200] ] "size/200h/landscape.jpg"
       [200 [200 200] ] "size/200x200-0xDDDDDD/portrait.jpg"
-      [200 [200 200] ] "size/200x200-0xDDDDDD/landscape.jpg"))
+      [200 [200 200] ] "size/200x200-0xDDDDDD/landscape.jpg"
+      [200 [200 267] ] "size/200w/watermark/10x10-watermark.png/portrait.jpg"))
   (testing "testing different input formats"
     (are [result uri] (= result (run-resizer uri))
       [200 [200 200] ] "size/200x200/rose.jpg"
@@ -87,7 +129,18 @@
 (deftest test-non-existing-image
   (let [secret "secret"
         mstore (memory-store)
-        handler (create-handler mstore)]
+        handler (create-handler mstore mstore)]
     (testing "a non existing original should return 404"
       (let [resized (handler (request :get "/size/200x200/nonexisting"))]
         (is (= 404 (:status resized)))))))
+
+(deftest test-nil-store
+  (let [ handler (create-handler nil nil)]
+    (let [result (handler (request :get "/size/200x400/foo"))]
+      (is (= 404 (:status result))))))
+
+(deftest test-nil-wmarkstore
+  (let [mstore (memory-store)
+        handler (create-handler mstore nil)
+        result (handler (request :get "/size/200x100/watermark/topleft-watermark.png/rose.jpg"))]
+    (is (= 200 (:status result)))))

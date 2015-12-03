@@ -1,6 +1,7 @@
 (ns net.umask.imageresizer.image
   (:refer-clojure :exclude [read])
-  (:require [clojure.java.io :as io])
+  (:require [clojure.java.io :as io]
+            [net.umask.imageresizer.bufferedimage :refer [buffered-image]])
   (:use [clojure.tools.logging :only (trace)])
   (:import [org.imgscalr Scalr Scalr$Method Scalr$Mode]
            [java.awt Image Transparency]
@@ -54,7 +55,7 @@
   "Reads a BufferedImage from source, something that can be turned into
   a file with clojure.java.io/file"
   [^InputStream source]
-  (ImageIO/read source))
+  (buffered-image source))
 
 (defn write
   "Writes img, a RenderedImage, to dest, an OutputStream

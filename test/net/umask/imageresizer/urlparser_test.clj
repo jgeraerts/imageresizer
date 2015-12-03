@@ -28,4 +28,10 @@
           :size {:height 400 :width 300 :color 0xFFEEDD}} "size/300x400-0xFFEEDD/foo/bar/original.jpg"
          {:crop {:x 10, :y 10, :width 10, :height 10}
           :size {:size 10},
-          :original "foo.jpg"} "crop/10x10x10x10/size/10/foo.jpg")))
+          :original "foo.jpg"} "crop/10x10x10x10/size/10/foo.jpg"
+         {:watermark {:x 10 :y 10 :watermark "logo"}
+          :original "foo.jpg"} "watermark/10x10-logo/foo.jpg"
+         {:watermark {:x -10 :y -10 :watermark "logo"}
+           :original "foo.jpg"} "watermark/-10x-10-logo/foo.jpg"
+         {:watermark {:anchor :topleft :watermark "logo"}
+          :original "foo.jpg"} "watermark/topleft-logo/foo.jpg")))

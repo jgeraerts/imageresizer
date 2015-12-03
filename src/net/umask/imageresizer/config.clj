@@ -6,8 +6,8 @@
             [net.umask.imageresizer.s3store :refer [create-s3cache
                                                     create-s3source]]))
 
-(defn resizer [&{:keys [secret source cache]}]
-  (create-resizer secret source cache))
+(defn resizer [&{:keys [secret source watermarks cache]}]
+  (create-resizer secret source watermarks cache))
 
 (defn s3source [&{:keys [bucket cred]}]
   (create-s3source bucket cred))

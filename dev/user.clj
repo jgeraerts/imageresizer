@@ -20,21 +20,47 @@
    [net.umask.imageresizer.filestore :refer [create-filecache]]
    [net.umask.imageresizer.server :as imgserver]
    [net.umask.imageresizer.store :as store]
-   [net.umask.imageresizer.s3store :as s3store]))
-  
+   [net.umask.imageresizer.s3store :as s3store]
+   [net.umask.imageresizer.bufferedimage :refer [buffered-image]]
+   [net.umask.imageresizer.watermark :refer [watermark]])
+  (:import
+   [javax.imageio ImageIO]
+   [java.awt.image BufferedImage]
+   [java.awt Graphics]
+   [javax.swing JFrame JPanel JLabel ImageIcon]))
+
+
+(defn- image-panel [image]
+  (doto (JPanel.)
+    (.add (JLabel. (ImageIcon. (buffered-image image))))))
+
+(defn display-image [image]
+  (doto (JFrame.)
+    (.add (image-panel image))
+    (.setDefaultCloseOperation JFrame/DISPOSE_ON_CLOSE)
+    (.setVisible true)
+    (.pack)
+    (.show)))
+
+
 (def secret "verysecret")
 
 (defn buildurl [url]
   (let [checksum (digest/md5 (str  secret url))]
     (str "/" checksum "/" url)))
 
+(defn display-url [url]
+  (display-image (java.net.URL. (str "http://localhost:8080" (buildurl url)))))
+
 (defn create-test-system []
   (let [mstore (memstore/create-memstore)
         cache (create-filecache "/temp/ilecache")
-        rose (io/input-stream (io/resource "rose.jpg"))]
+        rose (io/input-stream (io/resource "rose.jpg"))
+        watermark (io/input-stream (io/resource "watermark.png"))]
     (memstore/memorystore-write  mstore "rose.jpg" rose)
+    (memstore/memorystore-write  mstore "watermark.png" watermark)
     (component/system-map
-     :vhost {"localhost" (resizer/create-resizer secret mstore cache)}
+     :vhost {"localhost" (resizer/create-resizer secret mstore mstore cache)}
      :server  (component/using  (imgserver/create-server) [:vhost]))))
 
 
