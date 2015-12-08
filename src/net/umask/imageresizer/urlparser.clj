@@ -1,26 +1,32 @@
 (ns net.umask.imageresizer.urlparser
   (:require [clojure.edn :as edn]
-            [clojure.string :refer [join split]]
+            [clojure.string :refer [join split] :as string]
             [clojure.tools.logging :refer [debug trace]]))
 
 (set! *warn-on-reflection* true)
 
-(derive ::x      ::int)
-(derive ::y      ::int)
-(derive ::width  ::int)
-(derive ::height ::int)
-(derive ::size   ::int)
-(derive ::angle  ::int)
-(derive ::color  ::hex)
-(derive ::anchor ::keyword)
+(derive ::x          ::int)
+(derive ::y          ::int)
+(derive ::width      ::int)
+(derive ::height     ::int)
+(derive ::size       ::int)
+(derive ::angle      ::int)
+(derive ::color      ::hex)
+(derive ::anchor     ::keyword)
+(derive ::expires-at ::long)
 
 (defn- parseInt
   ([x] (Integer/parseInt x))
   ([x r] (Integer/parseInt x r)))
 
+(defn- parseLong [x]
+  (Long/parseLong x))
+
 (defmulti read-value  (fn [[k v]] (keyword (namespace ::int) (name k))))
 
 (defmethod read-value ::int [[k v]] [k (parseInt v)])
+
+(defmethod read-value ::long [[k v]] [k (parseLong v)])
 
 (defmethod read-value ::hex [[k v]] [k (parseInt v 16)])
 
@@ -56,6 +62,20 @@
                    :re-value #"^((?:top|mid|bottom)(?:left|center|right))-([0-9A-Za-z.]+)$"
                    :keys [:anchor :watermark]}])
 
+(defn trim-leading-slash [str]
+  (let [firstchar (first (seq str))]
+    (if (= \/ firstchar)
+      (subs str 1)
+      str)))
+
+(defn option-from-url [uri {option :key valuepattern :re-value valuekeys :keys}]
+  (let [[key value rest] (string/split (trim-leading-slash uri) #"/" 3)]
+    (if-let [values (and
+                     (= key (name option))
+                     (re-find valuepattern value))]
+      (into {:uri (str "/" rest)} (map read-value (zipmap valuekeys values)))
+      {:uri uri})))
+
 (defn- option-map [op key value]
   (if (= (name (:key op)) key)
     (let [values (re-find (:re-value op) value)
@@ -90,4 +110,3 @@
     (-> request
         parse-url-request
         handler)))
-

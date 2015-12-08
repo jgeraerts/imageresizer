@@ -5,6 +5,7 @@
             [net.umask.imageresizer.bytebuffer :refer [wrap-bytebuffer]]
             [net.umask.imageresizer.cache :refer [wrap-cache]]
             [net.umask.imageresizer.checksum :refer [wrap-checksum]]
+            [net.umask.imageresizer.expires :refer [wrap-expires]]
             [net.umask.imageresizer.graphics :refer [with-graphics]]
             [net.umask.imageresizer.image :as img]
             [net.umask.imageresizer.source :refer [get-image-stream]]
@@ -127,14 +128,14 @@
 
 
 (defn create-resizer [secret originals watermarks cache]
-  {:store originals
-   :handler (->> (load-source originals)
+  {:handler (->> (load-source originals)
                  (wrap-watermark watermarks)
                  (wrap-crop)
                  (wrap-scale)
                  (wrap-fill)
                  (wrap-output)
                  (wrap-cache cache)
+                 (wrap-expires)
                  (wrap-url-parser)
                  (wrap-checksum secret)
                  (wrap-bytebuffer))})
