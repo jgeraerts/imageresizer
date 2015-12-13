@@ -21,5 +21,5 @@
       (if (t/before? now expires-at)
         (-> (handler (assoc request :uri (:uri options)))
             (header  "expires" (tf/unparse rfc2616formatter expires-at))
-            (header  "cache-control" (str "max-age=" (-  (to-epoch expires-at) (to-epoch now)))))
+            (header  "cache-control" (str "max-age=" (long  (-  (to-epoch expires-at) (to-epoch now))))))
         (not-found "the link has expired")))))
