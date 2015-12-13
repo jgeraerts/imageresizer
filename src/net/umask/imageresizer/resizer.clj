@@ -16,6 +16,9 @@
   (:import (java.awt Color)
            (java.awt.image BufferedImage)))
 
+(def ^:const content-types {:jpg "image/jpeg"
+                             :png "image/png"})
+
 (defn- all-not-nil? [ vals ]
   (every? (comp not nil?) vals))
 
@@ -85,11 +88,6 @@
         i))
     i))
 
-(defn to-jpg [^BufferedImage i]
-  (let [bos (java.io.ByteArrayOutputStream.)]
-    (img/write i  bos :quality 90)
-    (.toByteArray bos)))
-
 (defn- wrap-transform [trans-fn handler]
   (fn [request]
     (let [{:keys [body status] :as response} (handler request)]
@@ -98,7 +96,16 @@
         response))))
 
 (defn wrap-output [handler]
-  (wrap-transform (fn [body request] (to-jpg body)) handler))
+  (fn [request]
+    (let [{:keys [body status] :as response} (handler request)]
+      (if (= 200 status)
+        (let [{:keys [format quality] :as options} (get-in request [:imageresizer :output] {:format :jpg :quality 90})
+              bos (java.io.ByteArrayOutputStream.)]
+          (img/write body bos :format format :quality quality)
+          (-> response
+              (assoc :body (.toByteArray bos))
+              (header "Content-Type" (content-types format))))
+        response))))
 
 (defn wrap-fill [handler]
   (wrap-transform (fn [body request] (fill-alpha body)) handler))

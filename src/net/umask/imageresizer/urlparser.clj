@@ -14,6 +14,8 @@
 (derive ::color      ::hex)
 (derive ::anchor     ::keyword)
 (derive ::expires-at ::long)
+(derive ::quality    ::int)
+(derive ::format     ::keyword)
 
 (defn- parseInt
   ([x] (Integer/parseInt x))
@@ -34,7 +36,13 @@
 
 (defmethod read-value :default [[k v]] [k v])
 
-(def ^:const ops [{:key :crop
+(def ^:const ops [{:key :output
+                   :re-value #"^(png|jpg)$"
+                   :keys [:format]}
+                  {:key :output
+                   :re-value #"^(jpg)-([0-9]{1,3})$"
+                   :keys [:format :quality]}
+                  {:key :crop
                    :re-value #"^([0-9]+)x([0-9]+)x([0-9]+)x([0-9]+)$"
                    :keys [:x :y :width :height]}
                   {:key :rotate

@@ -34,4 +34,13 @@
          {:watermark {:x -10 :y -10 :watermark "logo"}
            :original "foo.jpg"} "watermark/-10x-10-logo/foo.jpg"
          {:watermark {:anchor :topleft :watermark "logo"}
-          :original "foo.jpg"} "watermark/topleft-logo/foo.jpg")))
+          :original "foo.jpg"} "watermark/topleft-logo/foo.jpg"
+         {:output {:format :png}
+          :original "foo.jpg"}  "output/png/foo.jpg"
+         {:output {:format :jpg}
+          :original "foo.jpg"}  "output/jpg/foo.jpg"
+         {:output {:format :jpg :quality 80}
+          :original "foo.jpg"} "output/jpg-80/foo.jpg"
+         {:output {:format :jpg}
+          :size {:size 300}
+          :original "foo.jpg"} "output/jpg/size/300/foo.jpg")))
