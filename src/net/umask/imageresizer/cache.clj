@@ -13,8 +13,8 @@
       (if cachedresponse
         cachedresponse
         (let [response (handler request)]
-          (debug "saving response of url" uri request)
           (when (= 200 (:status response))
+            (debug "saving response of url" uri request)
             (store! cache uri response))
           response)))))
 
