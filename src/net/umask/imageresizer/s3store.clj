@@ -45,7 +45,7 @@
                        grants)
         (finally (.delete tempfile)))))
   (fetch [this name]
-    (if-let [s3response (get-object this (trim-leading-slash name))]
+    (when-let [s3response (get-object this (trim-leading-slash name))]
       (-> (response/response (:content s3response))
           (response/content-type (:content-type s3response))))))
   
