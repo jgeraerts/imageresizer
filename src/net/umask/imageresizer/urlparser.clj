@@ -2,7 +2,7 @@
   (:require [clojure.edn :as edn]
             [clojure.string :refer [join split] :as string]
             [clojure.tools.logging :refer [debug trace]]
-            [net.umask.imageresizer.util :refer [trim-leading-slash]]))
+            [net.umask.imageresizer.util :refer [trim-leading-slash split-uri-path]]))
 
 (set! *warn-on-reflection* true)
 
@@ -74,7 +74,7 @@
 
 
 (defn option-from-url [uri {option :key valuepattern :re-value valuekeys :keys}]
-  (let [[key value rest] (string/split (trim-leading-slash uri) #"/" 3)]
+  (let [[key value rest] (split-uri-path uri 3)]
     (if-let [values (and
                      (= key (name option))
                      (re-find valuepattern value))]
