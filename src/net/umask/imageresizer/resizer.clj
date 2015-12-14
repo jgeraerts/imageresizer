@@ -17,7 +17,9 @@
            (java.awt.image BufferedImage)))
 
 (def ^:const content-types {:jpg "image/jpeg"
-                             :png "image/png"})
+                            :png "image/png"})
+
+(def ^:const default-output-format {:format :jpg :quality 90})
 
 (defn- all-not-nil? [ vals ]
   (every? (comp not nil?) vals))
@@ -38,8 +40,7 @@
                                  :height height :fit fit :method :ultra-quality :ops [:antialias])
         {resized-image-height :height resized-image-width :width} (dimensions resized-image)
         x (/ (- width resized-image-width) 2)
-        y (/ (- height resized-image-height) 2)
-         ]
+        y (/ (- height resized-image-height) 2)]
     (with-graphics (new-buffered-image width height :rgb)
                   (.setColor  (Color. color))
                   (.fillRect 0 0 width height)
@@ -99,7 +100,7 @@
   (fn [request]
     (let [{:keys [body status] :as response} (handler request)]
       (if (= 200 status)
-        (let [{:keys [format quality] :as options} (get-in request [:imageresizer :output] {:format :jpg :quality 90})
+        (let [{:keys [format quality] :as options} (get-in request [:imageresizer :output] default-output-format)
               bos (java.io.ByteArrayOutputStream.)]
           (img/write body bos :format format :quality quality)
           (-> response
