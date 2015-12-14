@@ -5,6 +5,7 @@
             [clojure.string :refer [lower-case]]
             [net.umask.imageresizer.cache :as c]
             [net.umask.imageresizer.source :as source]
+            [net.umask.imageresizer.util :refer [trim-leading-slash]]
             [ring.util.response :as response])
   (:import (com.amazonaws AmazonServiceException)
            (java.io IOException)))
@@ -30,12 +31,6 @@
   (get-image-stream [this name]
     (:content (get-object this name))))
 
-
-(defn- s3uri [uri]
-  (if (= (.charAt uri 0) \/)
-    (subs uri 1)
-    uri))
-
 (defrecord S3Cache [bucket cred public]
   c/CacheProtocol
   (store! [this name response]
@@ -45,12 +40,12 @@
           grants (when public (s3/grant :all-users :read))]
       (try 
         (s3/put-object (:cred this) (:bucket this)
-                       (s3uri name) tempfile
+                       (trim-leading-slash name) tempfile
                        s3-headers
                        grants)
         (finally (.delete tempfile)))))
   (fetch [this name]
-    (if-let [s3response (get-object this (s3uri name))]
+    (if-let [s3response (get-object this (trim-leading-slash name))]
       (-> (response/response (:content s3response))
           (response/content-type (:content-type s3response))))))
   

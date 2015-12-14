@@ -1,7 +1,8 @@
 (ns net.umask.imageresizer.urlparser
   (:require [clojure.edn :as edn]
             [clojure.string :refer [join split] :as string]
-            [clojure.tools.logging :refer [debug trace]]))
+            [clojure.tools.logging :refer [debug trace]]
+            [net.umask.imageresizer.util :refer [trim-leading-slash]]))
 
 (set! *warn-on-reflection* true)
 
@@ -70,11 +71,7 @@
                    :re-value #"^((?:top|mid|bottom)(?:left|center|right))-([0-9A-Za-z.]+)$"
                    :keys [:anchor :watermark]}])
 
-(defn trim-leading-slash [str]
-  (let [firstchar (first (seq str))]
-    (if (= \/ firstchar)
-      (subs str 1)
-      str)))
+
 
 (defn option-from-url [uri {option :key valuepattern :re-value valuekeys :keys}]
   (let [[key value rest] (string/split (trim-leading-slash uri) #"/" 3)]
