@@ -7,7 +7,6 @@
             [net.umask.imageresizer.resizer :refer :all]
             [net.umask.imageresizer.urlparser :refer [wrap-url-parser]]
             [net.umask.imageresizer.memorystore :as memstore]
-            [net.umask.imageresizer.store :as store]
             [net.umask.imageresizer.cache :refer [CacheProtocol wrap-cache]]
             [net.umask.imageresizer.testutils :refer :all])
   (:import java.io.InputStream

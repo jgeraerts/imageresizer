@@ -19,7 +19,6 @@
    [net.umask.imageresizer.memorystore :as memstore]
    [net.umask.imageresizer.filestore :refer [create-filecache]]
    [net.umask.imageresizer.server :as imgserver]
-   [net.umask.imageresizer.store :as store]
    [net.umask.imageresizer.s3store :as s3store]
    [net.umask.imageresizer.bufferedimage :refer [buffered-image]]
    [net.umask.imageresizer.watermark :refer [watermark]])
