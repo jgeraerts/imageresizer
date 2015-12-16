@@ -48,8 +48,10 @@
   (let [checksum (digest/md5 (str  secret url))]
     (str "/" checksum "/" url)))
 
-(defn display-url [url]
-  (display-image (java.net.URL. (str "http://localhost:8080" (buildurl url)))))
+(defn display-url [uri]
+  (let [url (str "http://localhost:8080" (buildurl uri))]
+    (println (str "displaying " url))
+    (display-image (java.net.URL. url))))
 
 (defn create-test-system []
   (let [mstore (memstore/create-memstore)
