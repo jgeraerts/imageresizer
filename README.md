@@ -110,6 +110,9 @@ size | $(size)w | this resizes the image by keeping the aspect ratio and `size` 
 size | $(size)h | this resizes the image by keeping the aspect ratio and `size` will be used as the height
 size | $(width)wx$(height) | this resizes the image to the given dimensions of `width x height`. This crops the images from the center so to change the aspect ratio
 size | $(width)wx$(height)-0x$(rgbcolor) | this resizes the images to the given dimensions of `width x height` but instead of cropping from the center it pads the border with a color with rgb value `rgbcolor` to match the new aspect ratio.
+output | png | write as png output
+output | jpg | write to jpg with default quality 90
+output | jpg-$(quality) | write to jpg with `quality`. 
 expires | $(timestamp) | if a link is accessed after `timestamp` a 404 is generated. If it is accessed before normal processing applies. However the `Cache-Control` headers and `Expires` headers are calculated relatively to the expiration timestamp. The `timestamp` is in milliseconds since epoch. 
 
 The operations can be combined in multiple key value pairs. Check the unit tests for [examples] (../master/test/net/umask/imageresizer/resizer_test.clj#L61) of urls. 
