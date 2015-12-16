@@ -82,7 +82,7 @@
 
 (defn- addwatermark
   [^BufferedImage i watermarksource {watermarkname :watermark :as options}]
-  (if-let [watermark-img (and (all-not-nil? [watermark watermarksource])
+  (if-let [watermark-img (and (all-not-nil? [watermarkname watermarksource])
                               (get-image-stream watermarksource watermarkname))]
     (watermark i (buffered-image watermark-img) options)
     i))
