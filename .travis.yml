@@ -4,4 +4,4 @@ script: lein2 with-profile default:+1.8 test
 jdk:
  - oraclejdk8
  - oraclejdk7
- - openjdk7
+# - openjdk7
