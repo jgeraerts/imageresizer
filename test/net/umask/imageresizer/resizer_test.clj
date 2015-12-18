@@ -154,4 +154,5 @@
     (prop/for-all [v (gen/fmap clojure.string/join
                                (gen/vector
                                 (gen/one-of [gen/char-alphanumeric (gen/return \/)])))]
-                  (= 404 (:status (handler (request :get v)))))))
+                  (= 404 (:status (handler {:uri v
+                                            :request-method :get}))))))
