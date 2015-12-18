@@ -12,6 +12,7 @@
                  [clj-aws-s3 "0.3.10" :exclusions [commons-logging joda-time]]
                  [joda-time/joda-time "2.9.1"]
                  [org.clojure/tools.cli "0.3.3"]
+                 [org.clojure/test.check "0.9.0"]
                  [com.stuartsierra/component "0.3.1"]
                  [ring "1.4.0"]
                  [digest "1.4.4"]

@@ -1,6 +1,9 @@
 (ns net.umask.imageresizer.resizer-test
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.properties :as prop]
+            [clojure.test.check.generators :as gen]
             [ring.mock.request :refer :all]
             [net.umask.imageresizer.graphics :refer [with-graphics]]
             [net.umask.imageresizer.bufferedimage :refer [new-buffered-image dimensions]]
@@ -97,13 +100,13 @@
       [200 [200 200] ] "size/200x200/landscape.jpg"
       [200 [100 200] ] "size/100x200/portrait.jpg"
       [200 [100 200] ] "size/100x200/landscape.jpg"
-      [200 [100 125] ] "size/100x125/portrait.jpg" 
+      [200 [100 125] ] "size/100x125/portrait.jpg"
       [200 [100 125] ] "size/100x125/landscape.jpg"
-      [200 [125 100] ] "size/125x100/portrait.jpg" 
+      [200 [125 100] ] "size/125x100/portrait.jpg"
       [200 [125 100] ] "size/125x100/landscape.jpg"
-      [200 [100 133] ] "size/100x133/portrait.jpg" 
+      [200 [100 133] ] "size/100x133/portrait.jpg"
       [200 [100 133] ] "size/100x133/landscape.jpg"
-      [200 [133 100] ] "size/133x100/portrait.jpg" 
+      [200 [133 100] ] "size/133x100/portrait.jpg"
       [200 [133 100] ] "size/133x100/landscape.jpg"
       [200 [200 100] ] "size/200x100/portrait.jpg"
       [200 [200 100] ] "size/200x100/landscape.jpg"
@@ -143,3 +146,12 @@
         handler (create-handler mstore nil)
         result (handler (request :get "/size/200x100/watermark/topleft-watermark.png/rose.jpg"))]
     (is (= 200 (:status result)))))
+
+(defspec test-handler-should-return-404
+  100
+  (let [mstore (memory-store)
+        handler (create-handler mstore mstore)]
+    (prop/for-all [v (gen/fmap clojure.string/join
+                               (gen/vector
+                                (gen/one-of [gen/char-alphanumeric (gen/return \/)])))]
+                  (= 404 (:status (handler (request :get v)))))))
