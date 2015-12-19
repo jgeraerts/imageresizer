@@ -1,8 +1,8 @@
 (ns net.umask.imageresizer.image
   (:refer-clojure :exclude [read])
   (:require [clojure.java.io :as io]
+            [clojure.tools.logging :refer [debug trace]]
             [net.umask.imageresizer.bufferedimage :refer [buffered-image]])
-  (:use [clojure.tools.logging :only (trace)])
   (:import [org.imgscalr Scalr Scalr$Method Scalr$Mode]
            [java.awt Image Transparency]
            [java.io OutputStream InputStream]
