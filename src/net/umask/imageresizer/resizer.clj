@@ -70,15 +70,7 @@
     (img/rotate i angle)
     i))
 
-(defn- fill-alpha [^BufferedImage i]
-  (let [{width :width height :height} (dimensions i)
-        type (.getType i)]
-    (if (= BufferedImage/TYPE_INT_ARGB type)
-      (with-graphics (new-buffered-image width height :rgb)
-        (.setColor Color/WHITE)
-        (.fillRect 0 0 width height)
-        (.drawImage i 0 0 nil))
-      i)))
+(def ^:const convert-types #{BufferedImage/TYPE_INT_ARGB})
 
 (defn- addwatermark
   [^BufferedImage i watermarksource {watermarkname :watermark :as options}]
@@ -105,9 +97,6 @@
               (assoc :body (.toByteArray bos))
               (header "Content-Type" (content-types format))))
         response))))
-
-(defn wrap-fill [handler]
-  (wrap-transform (fn [body request] (fill-alpha body)) handler))
 
 (defn wrap-scale [handler]
   (wrap-transform (fn [body request] (scale body (get-in request [:imageresizer :size]))) handler))
@@ -138,7 +127,6 @@
                  (wrap-watermark watermarks)
                  (wrap-crop)
                  (wrap-scale)
-                 (wrap-fill)
                  (wrap-output)
                  (wrap-cache cache)
                  (wrap-expires)

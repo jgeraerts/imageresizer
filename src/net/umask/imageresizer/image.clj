@@ -2,9 +2,11 @@
   (:refer-clojure :exclude [read])
   (:require [clojure.java.io :as io]
             [clojure.tools.logging :refer [debug trace]]
-            [net.umask.imageresizer.bufferedimage :refer [buffered-image]])
+            [net.umask.imageresizer.graphics :refer [with-graphics]]
+            [net.umask.imageresizer.bufferedimage :refer [buffered-image dimensions new-buffered-image]]
+            [slingshot.slingshot :refer [throw+]])
   (:import [org.imgscalr Scalr Scalr$Method Scalr$Mode]
-           [java.awt Image Transparency]
+           [java.awt Image Transparency Color]
            [java.io OutputStream InputStream]
            [java.awt.image BufferedImage RenderedImage BufferedImageOp]
            [javax.imageio ImageIO ImageWriter ImageWriteParam IIOImage]
@@ -46,9 +48,11 @@
   [^BufferedImage img mode width height]
   (let [origWidth (.getWidth img)
         origHeight (.getHeight img)
-        [targetWidth targetHeight] ((mode fits) origWidth origHeight width height)
-        resample (ResampleOp. targetWidth targetHeight)]
-    (.filter resample img nil)))
+        [targetWidth targetHeight] ((mode fits) origWidth origHeight width height)]
+    (when (or (> 3 targetWidth)
+              (> 3 targetHeight))
+      (throw+ {:type ::invalid-dimensions :width targetWidth :height targetHeight}))
+    (.filter (ResampleOp. targetWidth targetHeight) img nil)))
 
 
 (defn read
@@ -56,6 +60,23 @@
   a file with clojure.java.io/file"
   [^InputStream source]
   (buffered-image source))
+
+(defn- to-rgb [^BufferedImage i]
+  (let [{width :width height :height} (dimensions i)]
+    (with-graphics (new-buffered-image width height :rgb)
+      (.setColor Color/WHITE)
+      (.fillRect 0 0 width height)
+      (.drawImage i 0 0 nil))))
+
+(def ^:const jpg-compatible-types #{BufferedImage/TYPE_3BYTE_BGR BufferedImage/TYPE_INT_RGB})
+
+(defn- to-compatible [^BufferedImage img imgformat]
+  (let [type (.getType img)]
+    (if (and
+         (contains? #{:jpg :jpeg} imgformat)
+         (not (contains? jpg-compatible-types type)))
+      (to-rgb img)
+      img)))
 
 (defn write
   "Writes img, a RenderedImage, to dest, an OutputStream
@@ -65,19 +86,22 @@
       :format  - :gif, :jpg, :png or anything supported by ImageIO
       :quality - for JPEG images, a number between 0 and 100"
   [^RenderedImage img ^OutputStream dest & {:keys [format quality] :or {format :jpg}}]
-  (if (or (not quality) (not (contains? #{:jpg :jpeg} format)))
-    (ImageIO/write img (name format) dest)
-    (with-open [imageOut (FileCacheImageOutputStream.  dest nil)] 
-      (let [iw (doto ^ImageWriter (first
-                                   (iterator-seq
-                                    (ImageIO/getImageWritersByFormatName
-                                     "jpeg")))
-                     (.setOutput imageOut))
-            iw-param (doto ^ImageWriteParam (.getDefaultWriteParam iw)
-                           (.setCompressionMode ImageWriteParam/MODE_EXPLICIT)
-                           (.setCompressionQuality (float (/ quality 100))))
-            iio-img (IIOImage. img nil nil)]
-        (.write iw nil iio-img iw-param)))))
+  (assert some? img)
+  (assert some? dest)
+  (let [compatible-img (to-compatible img format)]
+    (if (or (not quality) (not (contains? #{:jpg :jpeg} format)))
+      (ImageIO/write compatible-img (name format) dest)
+      (with-open [imageOut (FileCacheImageOutputStream.  dest nil)] 
+        (let [iw (doto ^ImageWriter (first
+                                     (iterator-seq
+                                      (ImageIO/getImageWritersByFormatName
+                                       "jpeg")))
+                   (.setOutput imageOut))
+              iw-param (doto ^ImageWriteParam (.getDefaultWriteParam iw)
+                         (.setCompressionMode ImageWriteParam/MODE_EXPLICIT)
+                         (.setCompressionQuality (float (/ quality 100))))
+              iio-img (IIOImage. compatible-img nil nil)]
+          (.write iw nil iio-img iw-param))))))
 
 (def ^:private scalr-methods
   {:auto Scalr$Method/AUTOMATIC

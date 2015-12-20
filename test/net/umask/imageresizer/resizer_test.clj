@@ -4,7 +4,10 @@
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.properties :as prop]
             [clojure.test.check.generators :as gen]
+            [clojure.tools.logging :refer [debug]]
+            [clojure.string :as string]
             [ring.mock.request :refer :all]
+            [net.umask.imageresizer.exceptions :refer [wrap-exceptions]]
             [net.umask.imageresizer.graphics :refer [with-graphics]]
             [net.umask.imageresizer.bufferedimage :refer [new-buffered-image dimensions]]
             [net.umask.imageresizer.resizer :refer :all]
@@ -20,23 +23,33 @@
 (def ^:const http-ok 200)
 (def ^:const white-rgb (.getRGB Color/WHITE))
 (def ^:const red-rgb (.getRGB Color/RED))
+(def ^:const testimages ["rose.jpg"
+                         "portrait.jpg"
+                         "landscape.jpg"
+                         "rose-cmyk.tiff"
+                         "rose-cmyk.jpg"
+                         "tux.png"
+                         "watermark.png"])
+
+(def not-nil? (complement nil?))
 
 (defn- create-handler [mstore watermarkstore]
   (->> (load-source mstore)
        (wrap-watermark watermarkstore)
        (wrap-crop)
        (wrap-scale)
-       (wrap-fill)
        (wrap-output)
-       (wrap-url-parser)))
+       (wrap-url-parser)
+       (wrap-exceptions)))
 
 (defn- add-to-store [mstore resource]
   (let [stream (io/input-stream (io/resource resource))]
+    (assert (not-nil? stream))
     (do (memstore/memorystore-write mstore resource stream))))
 
 (defn- memory-store []
   (let [mstore (memstore/create-memstore)]
-    (doseq [i ["rose.jpg" "portrait.jpg" "landscape.jpg" "rose-cmyk.tiff" "rose-cmyk.jpg" "tux.png" "watermark.png"]]
+    (doseq [i testimages]
       (add-to-store mstore i))
     mstore))
 
@@ -156,3 +169,23 @@
                                 (gen/one-of [gen/char-alphanumeric (gen/return \/)])))]
                   (= 404 (:status (handler {:uri v
                                             :request-method :get}))))))
+
+(def ^:const valid-responses #{200 400})
+
+(def gen-size (gen/large-integer* {:max 300 :min 1}))
+
+(def gen-sizes
+  (gen/one-of [(gen/return [])
+               (gen/tuple (gen/return "size")
+                          gen-size)]))
+
+(defspec test-resizing
+  100
+  (let [mstore (memory-store)
+        handler (create-handler mstore mstore)]
+    (prop/for-all [o (gen/elements testimages)
+                   size gen-sizes]
+                  (let [url (string/join \/ (conj size o))
+                        response (handler (request :get (str "/" url)))]
+                    (debug "url  " url " gave response " response)
+                    (contains? valid-responses (:status response))))))

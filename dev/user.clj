@@ -21,7 +21,8 @@
    [net.umask.imageresizer.server :as imgserver]
    [net.umask.imageresizer.s3store :as s3store]
    [net.umask.imageresizer.bufferedimage :refer [buffered-image]]
-   [net.umask.imageresizer.watermark :refer [watermark]])
+   [net.umask.imageresizer.watermark :refer [watermark]]
+   [net.umask.imageresizer.image :as img])
   (:import
    [javax.imageio ImageIO]
    [java.awt.image BufferedImage]
