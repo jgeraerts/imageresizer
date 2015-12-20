@@ -172,20 +172,36 @@
 
 (def ^:const valid-responses #{200 400})
 
+(def gen-color (gen/large-integer* {:max 0xFFFFFF :min 0}))
 (def gen-size (gen/large-integer* {:max 300 :min 1}))
+(def gen-width-size (gen/fmap #(str % "w") gen-size))
+(def gen-height-size (gen/fmap #(str % "h") gen-size))
+(def gen-width-times-height-size (gen/fmap #(apply format "%dx%d" %) (gen/tuple gen-size gen-size)))
+(def gen-width-times-height-color-size (gen/fmap #(apply format "%dx%d-0x%06X" %) (gen/tuple gen-size gen-size gen-color)))
 
 (def gen-sizes
   (gen/one-of [(gen/return [])
                (gen/tuple (gen/return "size")
-                          gen-size)]))
+                          (gen/one-of [gen-size
+                                       gen-width-size
+                                       gen-height-size
+                                       gen-width-times-height-size
+                                       gen-width-times-height-color-size]))]))
+
+(def gen-output-format
+  (gen/one-of [(gen/return [])
+               (gen/tuple (gen/return "output")
+                          (gen/one-of [(gen/return "png")
+                                       (gen/return "jpg")]))]))
 
 (defspec test-resizing
   100
   (let [mstore (memory-store)
         handler (create-handler mstore mstore)]
     (prop/for-all [o (gen/elements testimages)
+                   output gen-output-format
                    size gen-sizes]
-                  (let [url (string/join \/ (conj size o))
+                  (let [url (string/join \/ (conj (into [] (concat output size)) o))
                         response (handler (request :get (str "/" url)))]
-                    (debug "url  " url " gave response " response)
+                    (debug "url  " url " gave response" response)
                     (contains? valid-responses (:status response))))))
