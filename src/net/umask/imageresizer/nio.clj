@@ -11,7 +11,7 @@
       (getPath name (make-array String 0))))
 
 (defn resolve
-  ([^Path parent ^Path other]
+  ([^Path parent ^String other]
    (.resolve parent other))
   ([^Path parent other & more]
    (reduce resolve (resolve parent other) more)))
