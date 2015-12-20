@@ -29,4 +29,4 @@
                                   [reloaded.repl "0.2.1"]
                                   [org.clojure/tools.trace "0.7.9"]]
                    :source-paths ["dev"]}
-             :1.8 {:dependencies [[org.clojure/clojure "1.8.0-RC3"]]}})
+             :1.8 {:dependencies [[org.clojure/clojure "1.8.0-RC4"]]}})
