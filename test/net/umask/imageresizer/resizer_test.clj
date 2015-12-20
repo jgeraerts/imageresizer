@@ -173,11 +173,32 @@
 (def ^:const valid-responses #{200 400})
 
 (def gen-color (gen/large-integer* {:max 0xFFFFFF :min 0}))
-(def gen-size (gen/large-integer* {:max 300 :min 1}))
+(def gen-size (gen/large-integer* {:max 3000 :min 0}))
 (def gen-width-size (gen/fmap #(str % "w") gen-size))
 (def gen-height-size (gen/fmap #(str % "h") gen-size))
 (def gen-width-times-height-size (gen/fmap #(apply format "%dx%d" %) (gen/tuple gen-size gen-size)))
 (def gen-width-times-height-color-size (gen/fmap #(apply format "%dx%d-0x%06X" %) (gen/tuple gen-size gen-size gen-color)))
+
+(def ^:const watermark-anchors ["topleft"
+                                "topcenter"
+                                "topright"
+                                "midleft"
+                                "midcenter"
+                                "midright"
+                                "bottomright"
+                                "bottomcenter"
+                                "bottomright"])
+
+(def gen-watermark
+  (gen/one-of [(gen/return [])
+               (gen/tuple (gen/return "watermark")
+                          (gen/fmap #(apply format "%s-%s" %)
+                                    (gen/tuple
+                                     (gen/one-of
+                                      [(gen/elements watermark-anchors)
+                                                  (gen/fmap #(apply format "%dx%d" %)
+                                                            (gen/tuple gen-size gen-size))])
+                                     (gen/elements ["watermark.png"]))))]))
 
 (def gen-sizes
   (gen/one-of [(gen/return [])
@@ -199,9 +220,10 @@
   (let [mstore (memory-store)
         handler (create-handler mstore mstore)]
     (prop/for-all [o (gen/elements testimages)
+                   watermark gen-watermark
                    output gen-output-format
                    size gen-sizes]
-                  (let [url (string/join \/ (conj (into [] (concat output size)) o))
+                  (let [url (string/join \/ (conj (into [] (concat output size watermark)) o))
                         response (handler (request :get (str "/" url)))]
                     (debug "url  " url " gave response" response)
                     (contains? valid-responses (:status response))))))

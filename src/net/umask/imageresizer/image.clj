@@ -132,6 +132,11 @@
   [img angle]
   (Scalr/rotate img angle (make-array BufferedImageOp 0)))
 
+(defn- assert-larger-than-zero [x]
+  (if (> x 0)
+    x
+    (throw+ {:type ::invalid-dimensions})))
+
 (defn ^BufferedImage scale
   "Scales a BufferedImage and returns the result, also a BufferedImage. Leaves
   the original unmodified.
@@ -154,8 +159,9 @@
                       :brighten, :darken, :grayscale, :antialias"
   [^RenderedImage img & {:keys [size width height method fit ops]
                          :or {method :auto fit :auto}}]
-  (let [width (or width size)
-        height (or height size)
+  
+  (let [width (assert-larger-than-zero (or width size))
+        height (assert-larger-than-zero (or height size))
         ops (into-array BufferedImageOp (map #(get scalr-ops % %) ops))
         img-width (.getWidth img)
         img-height (.getHeight img)
@@ -164,9 +170,6 @@
                  :height
                  :width)
                fit)
-        ;; scaled-img ^RenderedImage (Scalr/resize
-        ;;                            img (scalr-methods method) (scalr-fits fit*)
-        ;;                            width height ops)
         scaled-img (resize img fit* width height)
         ]
     (trace "scaled image with dimenions " img-width "x" img-height " to " (.getWidth scaled-img) "x" (.getHeight scaled-img))
