@@ -1,7 +1,8 @@
 (ns net.umask.imageresizer.resizer
-  (:require [clojure.java.io :as io]
-            [clojure.tools.logging :refer [debug warn]]
-            [net.umask.imageresizer.bufferedimage :refer [buffered-image new-buffered-image dimensions]]
+  (:require [clojure.tools.logging :refer [debug warn]]
+            [net.umask.imageresizer.bufferedimage :refer [buffered-image
+                                                          dimensions
+                                                          new-buffered-image]]
             [net.umask.imageresizer.bytebuffer :refer [wrap-bytebuffer]]
             [net.umask.imageresizer.cache :refer [wrap-cache]]
             [net.umask.imageresizer.checksum :refer [wrap-checksum]]
@@ -10,8 +11,8 @@
             [net.umask.imageresizer.image :as img]
             [net.umask.imageresizer.source :refer [get-image-stream]]
             [net.umask.imageresizer.urlparser :refer :all]
-            [net.umask.imageresizer.watermark :refer [watermark]]
             [net.umask.imageresizer.util :refer [assert-larger-than-zero]]
+            [net.umask.imageresizer.watermark :refer [watermark]]
             [ring.util.response :refer [content-type header not-found
                                         response]])
   (:import (java.awt Color)
