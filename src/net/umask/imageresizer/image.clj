@@ -4,6 +4,7 @@
             [clojure.tools.logging :refer [debug trace]]
             [net.umask.imageresizer.graphics :refer [with-graphics]]
             [net.umask.imageresizer.bufferedimage :refer [buffered-image dimensions new-buffered-image]]
+            [net.umask.imageresizer.util :refer [assert-larger-than-zero]]
             [slingshot.slingshot :refer [throw+]])
   (:import [org.imgscalr Scalr Scalr$Method Scalr$Mode]
            [java.awt Image Transparency Color]
@@ -132,10 +133,7 @@
   [img angle]
   (Scalr/rotate img angle (make-array BufferedImageOp 0)))
 
-(defn- assert-larger-than-zero [x]
-  (if (> x 0)
-    x
-    (throw+ {:type ::invalid-dimensions})))
+
 
 (defn ^BufferedImage scale
   "Scales a BufferedImage and returns the result, also a BufferedImage. Leaves

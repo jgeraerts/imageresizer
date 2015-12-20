@@ -11,6 +11,7 @@
             [net.umask.imageresizer.source :refer [get-image-stream]]
             [net.umask.imageresizer.urlparser :refer :all]
             [net.umask.imageresizer.watermark :refer [watermark]]
+            [net.umask.imageresizer.util :refer [assert-larger-than-zero]]
             [ring.util.response :refer [content-type header not-found
                                         response]])
   (:import (java.awt Color)
@@ -30,6 +31,8 @@
   (img/scale i :size size :fit :auto :method :ultra-quality :ops [:antialias]))
 
 (defmethod scale #{:color :height :width} [^BufferedImage i {height :height width :width color :color}]
+  (assert-larger-than-zero height)
+  (assert-larger-than-zero width)
   (debug "scaling to (" width "," height ") color " color)
   (let [{img-width :width img-height :height} (dimensions i)
         fit (if (>= (/ height width) (/ img-height img-width))
