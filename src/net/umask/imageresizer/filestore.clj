@@ -7,9 +7,6 @@
             [net.umask.imageresizer.nio :as nio]
             [net.umask.imageresizer.source :refer [ImageSource]]))
 
-(defn appendPath [parent sibling]
-  (.resolvePath parent sibling))
-
 (defn getfile [ basedir name] 
     (io/file basedir name))
 

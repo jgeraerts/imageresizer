@@ -36,7 +36,7 @@
 
 (defn display-image [image]
   (doto (JFrame.)
-    (.add (image-panel image))
+    (.add ^java.awt.Component (image-panel image))
     (.setDefaultCloseOperation JFrame/DISPOSE_ON_CLOSE)
     (.setVisible true)
     (.pack)

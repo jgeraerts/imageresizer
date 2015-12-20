@@ -90,7 +90,7 @@
   (assert some? dest)
   (let [compatible-img (to-compatible img format)]
     (if (or (not quality) (not (contains? #{:jpg :jpeg} format)))
-      (ImageIO/write compatible-img (name format) dest)
+      (ImageIO/write ^BufferedImage compatible-img (name format) dest)
       (with-open [imageOut (FileCacheImageOutputStream.  dest nil)] 
         (let [iw (doto ^ImageWriter (first
                                      (iterator-seq
@@ -100,7 +100,7 @@
               iw-param (doto ^ImageWriteParam (.getDefaultWriteParam iw)
                          (.setCompressionMode ImageWriteParam/MODE_EXPLICIT)
                          (.setCompressionQuality (float (/ quality 100))))
-              iio-img (IIOImage. compatible-img nil nil)]
+              iio-img (IIOImage. ^BufferedImage compatible-img nil nil)]
           (.write iw nil iio-img iw-param))))))
 
 (def ^:private scalr-methods

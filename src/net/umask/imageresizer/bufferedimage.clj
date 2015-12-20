@@ -7,7 +7,7 @@
 (def ^:const typemapping
   {:rgb BufferedImage/TYPE_INT_RGB})
 
-(defn dimensions [img]
+(defn dimensions [^BufferedImage img]
   {:width (.getWidth img)
    :height (.getHeight img)})
 

@@ -8,7 +8,7 @@
             [net.umask.imageresizer.util :refer [trim-leading-slash]]
             [ring.util.response :as response])
   (:import (com.amazonaws AmazonServiceException)
-           (java.io IOException)))
+           (java.io IOException File)))
 
 (defn- write-to-tempfile [in]
   (let [tempfile (java.io.File/createTempFile "s3store" "")]
@@ -43,7 +43,7 @@
                        (trim-leading-slash name) tempfile
                        s3-headers
                        grants)
-        (finally (.delete tempfile)))))
+        (finally (.delete ^File tempfile)))))
   (fetch [this name]
     (when-let [s3response (get-object this (trim-leading-slash name))]
       (-> (response/response (:content s3response))
