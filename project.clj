@@ -12,7 +12,6 @@
                  [digest "1.4.4"]
                  [http-kit "2.1.19"]
                  [joda-time/joda-time "2.9.1"]
-                 [netty-ring-adapter "0.4.6"]
                  [org.clojure/clojure "1.7.0"]
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/tools.cli "0.3.3"]
