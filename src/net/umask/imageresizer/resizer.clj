@@ -14,7 +14,8 @@
             [net.umask.imageresizer.util :refer [assert-larger-than-zero]]
             [net.umask.imageresizer.watermark :refer [watermark]]
             [ring.util.response :refer [content-type header not-found
-                                        response]])
+                                        response]]
+            [slingshot.slingshot :refer [throw+]])
   (:import (java.awt Color)
            (java.awt.image BufferedImage)))
 
@@ -63,7 +64,7 @@
 (defmethod scale :default [image size] image)
 
 (defn- crop
-  [i {x :x y :y width :width height :height}]
+  [i {x :x y :y width :width height :height :as foo}]
   (if (all-not-nil? [x y width height])
     (img/crop i x y width height)
     i))
@@ -106,7 +107,8 @@
   (wrap-transform (fn [body request] (scale body (get-in request [:imageresizer :size]))) handler))
 
 (defn wrap-crop [handler]
-  (wrap-transform (fn [body request] (crop body (get-in request [:imageresizer :crop]))) handler))
+  (wrap-transform (fn [body request]
+                    (crop body (get-in request [:imageresizer :crop]))) handler))
 
 (defn wrap-watermark [watermarks handler]
   (wrap-transform (fn [body request ]

@@ -43,9 +43,7 @@
                   {:key :output
                    :re-value #"^(jpg)-([0-9]{1,3})$"
                    :keys [:format :quality]}
-                  {:key :crop
-                   :re-value #"^([0-9]+)x([0-9]+)x([0-9]+)x([0-9]+)$"
-                   :keys [:x :y :width :height]}
+                  
                   {:key :rotate
                    :re-value #"^([0-9]+)$"
                    :keys [:angle]}
@@ -64,6 +62,9 @@
                   {:key :size
                    :re-value #"^([0-9]+)h$"
                    :keys [:height]}
+                  {:key :crop
+                   :re-value #"^([0-9]+)x([0-9]+)x([0-9]+)x([0-9]+)$"
+                   :keys [:x :y :width :height]}
                   {:key :watermark
                    :re-value #"^(-?[0-9]+)x(-?[0-9]+)-([0-9A-Za-z.]+)$"
                    :keys [:x :y :watermark]}

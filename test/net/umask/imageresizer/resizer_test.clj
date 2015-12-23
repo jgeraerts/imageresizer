@@ -125,8 +125,8 @@
       [200 [200 100] ] "size/200x100/landscape.jpg"
       [200 [200 200] ] "crop/20x20x200x200/portrait.jpg"
       [200 [200 200] ] "crop/20x20x200x200/landscape.jpg"
-      [200 [100 100] ] "crop/20x20x200x200/size/100/portrait.jpg"
-      [200 [100 100] ] "crop/20x20x200x200/size/100/landscape.jpg"
+      [200 [100 100] ] "size/100/crop/20x20x200x200/portrait.jpg"
+      [200 [100 100] ] "size/100/crop/20x20x200x200/landscape.jpg"
       [200 [200 267] ] "size/200w/portrait.jpg"
       [200 [200 150] ] "size/200w/landscape.jpg"
       [200 [150 200] ] "size/200h/portrait.jpg"
@@ -200,6 +200,11 @@
                                                             (gen/tuple gen-size gen-size))])
                                      (gen/elements ["watermark.png"]))))]))
 
+(def gen-crop
+  (gen/one-of [(gen/return [])
+               (gen/tuple (gen/return "crop")
+                          (gen/fmap #(apply format "%dx%dx%dx%d" %) (gen/vector gen-size 4)))]))
+
 (def gen-sizes
   (gen/one-of [(gen/return [])
                (gen/tuple (gen/return "size")
@@ -222,8 +227,9 @@
     (prop/for-all [o (gen/elements testimages)
                    watermark gen-watermark
                    output gen-output-format
+                   crop gen-crop
                    size gen-sizes]
-                  (let [url (string/join \/ (conj (into [] (concat output size watermark)) o))
+                  (let [url (string/join \/ (conj (into [] (concat output size crop watermark)) o))
                         response (handler (request :get (str "/" url)))]
                     (debug "url  " url " gave response" response)
                     (contains? valid-responses (:status response))))))

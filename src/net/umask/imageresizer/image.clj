@@ -47,9 +47,11 @@
 (defn- ^BufferedImage resize
   "Resize img "
   [^BufferedImage img mode width height]
-  (let [origWidth (.getWidth img)
-        origHeight (.getHeight img)
+  (let [{origWidth :width origHeight :height} (dimensions img)
         [targetWidth targetHeight] ((mode fits) origWidth origHeight width height)]
+    (when (or (> 3 origWidth)
+              (> 3 origHeight))
+      (throw+ {:type ::invalid-source-dimensions :width targetWidth :height targetHeight}))
     (when (or (> 3 targetWidth)
               (> 3 targetHeight))
       (throw+ {:type ::invalid-dimensions :width targetWidth :height targetHeight}))
@@ -127,6 +129,14 @@
   "Crops img, a BufferedImage, to the dimensions specificied by x, y, width,
   and height. Returns the cropped image and does not modify img itself."
   [img x y width height]
+  (when-not (and (< 0 width)
+                 (< 0 height))
+    (throw+ {:type ::invalid-crop :dimensions [width height]}))
+  (let [{source-width :width source-height :height} (dimensions img)]
+    (when (> (+ x width) source-width)
+      (throw+ {:type ::invalid-crop-x :x x :crop-width width :source-width source-width}))
+    (when (> (+ y height) source-height)
+      (throw+ {:type ::invalid-crop-y :y y :crop-height height :source-height source-height})))
   (Scalr/crop img x y width height (make-array BufferedImageOp 0)))
 
 (defn rotate
