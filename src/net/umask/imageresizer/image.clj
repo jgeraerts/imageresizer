@@ -171,9 +171,6 @@
     (if-not (= :crop fit)
       scaled-img
       (let [[x y] (if (= :width fit*)
-                    [0 (quot (- (.getHeight scaled-img) height) 2)]
-                    [(quot (- (.getWidth scaled-img) width) 2) 0])
-            cropped-img (crop scaled-img x y width height)]
-        (.flush ^Image scaled-img)
-        cropped-img))))
-
+                    [0 (quot (- scaled-height height) 2)]
+                    [(quot (-  scaled-width width) 2) 0])]
+        (crop scaled-img x y width height)))))
