@@ -106,18 +106,6 @@
               iio-img (IIOImage. ^BufferedImage compatible-img nil nil)]
           (.write iw nil iio-img iw-param))))))
 
-(def ^:private scalr-methods
-  {:auto Scalr$Method/AUTOMATIC
-   :balanced Scalr$Method/BALANCED
-   :quality Scalr$Method/QUALITY
-   :speed Scalr$Method/SPEED
-   :ultra-quality Scalr$Method/ULTRA_QUALITY})
-
-(def ^:private scalr-fits
-  {:auto Scalr$Mode/AUTOMATIC
-   :stretch Scalr$Mode/FIT_EXACT
-   :height Scalr$Mode/FIT_TO_HEIGHT
-   :width Scalr$Mode/FIT_TO_WIDTH})
 
 (def ^:private scalr-ops
   {:brighten Scalr/OP_BRIGHTER
