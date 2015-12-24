@@ -165,22 +165,21 @@
       :ops      - collection of BufferedImageOps to apply to the final image.
                   The follow keywords are also valid:
                       :brighten, :darken, :grayscale, :antialias"
-  [^RenderedImage img & {:keys [size width height method fit ops]
+  [^RenderedImage source & {:keys [size width height method fit ops]
                          :or {method :auto fit :auto}}]
   
   (let [width (assert-larger-than-zero (or width size))
         height (assert-larger-than-zero (or height size))
         ops (into-array BufferedImageOp (map #(get scalr-ops % %) ops))
-        img-width (.getWidth img)
-        img-height (.getHeight img)
+        {source-width :width source-height :height} (dimensions source)
         fit* (if (= :crop fit)
-               (if (>= (/ height width) (/ img-height img-width))
+               (if (>= (/ height width) (/ source-height source-width))
                  :height
                  :width)
                fit)
-        scaled-img (resize img fit* width height)
-        ]
-    (trace "scaled image with dimenions " img-width "x" img-height " to " (.getWidth scaled-img) "x" (.getHeight scaled-img))
+        scaled-img (resize source fit* width height)
+        {scaled-width :width scaled-height :height} (dimensions scaled-img)]
+    (trace "scaled image width dimensions " source-width "x" source-height " to " scaled-width "x" scaled-height)
     (if-not (= :crop fit)
       scaled-img
       (let [[x y] (if (= :width fit*)
