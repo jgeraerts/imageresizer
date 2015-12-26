@@ -95,7 +95,8 @@
   (fn [request]
     (let [{:keys [body status] :as response} (handler request)]
       (if (= 200 status)
-        (let [{:keys [format quality] :as options} (get-in request [:imageresizer :output] default-output-format)
+        (let [{:keys [format quality] :as options} (get-in request [:imageresizer :output]
+                                                           default-output-format)
               bos (java.io.ByteArrayOutputStream.)]
           (img/write body bos :format format :quality quality)
           (-> response
