@@ -1,5 +1,6 @@
 (ns net.umask.imageresizer.checksum
   (:require [clojure.tools.logging :refer [warn]]
+            digest
             [ring.util.response :as response]
             [net.umask.imageresizer.util :refer [split-uri-path]]))
 
