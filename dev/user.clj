@@ -56,15 +56,12 @@
 
 (defn create-test-system []
   (let [mstore (memstore/create-memstore)
-        cache (create-filecache "/temp/ilecache")
-        rose (io/input-stream (io/resource "rose.jpg"))
-        watermark (io/input-stream (io/resource "watermark.png"))]
-    (memstore/memorystore-write  mstore "rose.jpg" rose)
-    (memstore/memorystore-write  mstore "watermark.png" watermark)
+        cache (create-filecache "/tmp/filecache")]
+    (doseq [img ["rose.jpg" "portrait.jpg" "landscape.jpg" "watermark.png"]]
+      (memstore/memorystore-write  mstore img (io/input-stream (io/resource img))))
     (component/system-map
      :vhost {"localhost" (resizer/create-resizer secret mstore mstore cache)}
      :server  (component/using  (imgserver/create-server) [:vhost]))))
-
 
 (reloaded.repl/set-init! create-test-system)
 
