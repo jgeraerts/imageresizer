@@ -9,7 +9,7 @@
 
 (def  rfc2616formatter (tf/formatter "EEE, dd MMM yyyy HH:mm:ss 'GMT'"))
 
-(def  way-ahead-of-time (to-long (t/date-time 2099 12 31)))
+(def  way-ahead-of-time (to-long (t/date-time 2038 01 01)))
 
 (def ^:const expire-option {:key :expires :re-value #"^([0-9]+)$" :keys [:expires-at]})
 

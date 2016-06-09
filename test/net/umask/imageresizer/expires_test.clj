@@ -23,8 +23,8 @@
           (handler {:uri (expires-link (to-long (t/date-time 2015 12 03)))})))
    (is (= {:uri "/foo.jpg"
            :headers
-           {"expires" "Thu, 31 Dec 2099 00:00:00 GMT",
-            "cache-control" "max-age=2653430400"}}
+           {"expires" "Fri, 01 Jan 2038 00:00:00 GMT",
+            "cache-control" "max-age=696988800"}}
           (handler {:uri "/foo.jpg"})))))
 
 (deftest test-parse-expire-options
