@@ -8,7 +8,7 @@
   [url name  {:keys [fromregex replacement] :as rewrite}]
   
   (let [rewritten-name (if (empty? rewrite)
-                         (str name "mekker")
+                         name
                          (string/replace name fromregex replacement))]
     (str url rewritten-name)))
 
