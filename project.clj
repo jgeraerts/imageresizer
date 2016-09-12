@@ -12,7 +12,7 @@
                  [digest "1.4.5"]
                  [http-kit "2.2.0"]
                  [joda-time/joda-time "2.9.4"]
-                 [org.clojure/clojure "1.7.0"]
+                 [org.clojure/clojure "1.8.0"]
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/tools.cli "0.3.5"]
                  [org.clojure/tools.logging "0.3.1"]
@@ -28,4 +28,5 @@
                                   [reloaded.repl "0.2.3"]
                                   [org.clojure/tools.trace "0.7.9"]]
                    :source-paths ["dev"]}
-             :1.8 {:dependencies [[org.clojure/clojure "1.8.0-RC4"]]}})
+             ;:1.9 {:dependencies [[org.clojure/clojure "1.9.0-alpha12"]]}
+             })
