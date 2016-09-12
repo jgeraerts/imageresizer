@@ -131,10 +131,10 @@
 
 (defn create-resizer [secret originals watermarks cache]
   {:handler (->> (load-source originals)
-                 (wrap-watermark watermarks)
                  (wrap-crop)
                  (wrap-scale)
-                 (wrap-output)
+                 (wrap-watermark watermarks)
+                 (wrap-output)                 
                  (wrap-cache cache)
                  (wrap-expires)
                  (wrap-url-parser)

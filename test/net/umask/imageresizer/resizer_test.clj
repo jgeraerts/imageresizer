@@ -34,10 +34,10 @@
 (def not-nil? (complement nil?))
 
 (defn- create-handler [mstore watermarkstore]
-  (->> (load-source mstore)
-       (wrap-watermark watermarkstore)
+  (->> (load-source mstore)       
        (wrap-crop)
        (wrap-scale)
+       (wrap-watermark watermarkstore)
        (wrap-output)
        (wrap-url-parser)
        (wrap-exceptions)))
@@ -133,7 +133,7 @@
       [200 [267 200] ] "size/200h/landscape.jpg"
       [200 [200 200] ] "size/200x200-0xDDDDDD/portrait.jpg"
       [200 [200 200] ] "size/200x200-0xDDDDDD/landscape.jpg"
-      [200 [200 267] ] "size/200w/watermark/10x10-watermark.png/portrait.jpg"))
+      [200 [200 267] ] "watermark/10x10-watermark.png/size/200w/portrait.jpg"))
   (testing "testing different input formats"
     (are [result uri] (= result (run-resizer uri))
       [200 [200 200] ] "size/200x200/rose.jpg"
@@ -157,7 +157,7 @@
 (deftest test-nil-wmarkstore
   (let [mstore (memory-store)
         handler (create-handler mstore nil)
-        result (handler (request :get "/size/200x100/watermark/topleft-watermark.png/rose.jpg"))]
+        result (handler (request :get "/watermark/topleft-watermark.png/size/200x100/rose.jpg"))]
     (is (= 200 (:status result)))))
 
 (defspec test-handler-should-return-404
@@ -229,7 +229,7 @@
                    output gen-output-format
                    crop gen-crop
                    size gen-sizes]
-                  (let [url (string/join \/ (conj (into [] (concat output size crop watermark)) o))
+                  (let [url (string/join \/ (conj (into [] (concat output watermark size crop)) o))
                         response (handler (request :get (str "/" url)))]
                     (debug "url  " url " gave response" response)
                     (contains? valid-responses (:status response))))))

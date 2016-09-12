@@ -1,7 +1,6 @@
 (ns net.umask.imageresizer.util
   (:require [clojure.string :as string]
-            [slingshot.slingshot :refer [throw+]])
-  )
+            [slingshot.slingshot :refer [throw+]]))
 
 (defn trim-leading-slash [str]
   (let [firstchar (first (seq str))]

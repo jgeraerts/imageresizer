@@ -21,21 +21,43 @@
          (persistent!)
          (#(vector (:x1 %1) (:y1 %1) (:x2 %1) (:y2 %1))))))
 
-(defn- add-watermark-and-find [options]
+(defn- add-watermark-and-find [[wmark-width wmark-height] options]
   (let [img (generate-test-image 20 40 :white)
-        wimg (generate-test-image 10 10 :black)]
+        wimg (generate-test-image wmark-width wmark-height :black)]
     (find-watermark (watermark img wimg options))))
 
 (deftest test-watermark
-  (are [expected options] (= expected (add-watermark-and-find options))
-    [0   0  9  9] {:x 0 :y 0}
-    [1   1 10 10] {:x 1 :y 1}
-    [0   0  9  9] {:anchor :topleft}
-    [5   0 14  9] {:anchor :topcenter}
-    [10  0 19  9] {:anchor :topright}
-    [0  15  9 24] {:anchor :midleft}
-    [5  15 14 24] {:anchor :midcenter}
-    [10 15 19 24] {:anchor :midright}
-    [0  30  9 39] {:anchor :bottomleft}
-    [5  30 14 39] {:anchor :bottomcenter}
-    [10 30 19 39] {:anchor :bottomright}))
+  (are [expected watermarksize options] (= expected (add-watermark-and-find watermarksize options))
+    [0   0  9  9] [10 10] {:x 0 :y 0}
+    [1   1 10 10] [10 10] {:x 1 :y 1}
+    [0   0  9  9] [10 10] {:anchor :topleft}
+    [5   0 14  9] [10 10] {:anchor :topcenter}
+    [10  0 19  9] [10 10] {:anchor :topright}
+    [0  15  9 24] [10 10] {:anchor :midleft}
+    [5  15 14 24] [10 10] {:anchor :midcenter}
+    [10 15 19 24] [10 10] {:anchor :midright}
+    [0  30  9 39] [10 10] {:anchor :bottomleft}
+    [5  30 14 39] [10 10] {:anchor :bottomcenter}
+    [10 30 19 39] [10 10] {:anchor :bottomright}
+    [0   0 19 19] [40 40] {:x 0 :y 0}
+    [1   1 19 19] [40 40] {:x 1 :y 1}
+    [0   0 19 19] [40 40] {:anchor :topleft}
+    [0   0 19 19] [40 40] {:anchor :topcenter}
+    [0   0 19 19] [40 40] {:anchor :topright}
+    [0  10 19 29] [40 40] {:anchor :midleft}
+    [0  10 19 29] [40 40] {:anchor :midcenter}
+    [0  10 19 29] [40 40] {:anchor :midright}
+    [0  20 19 39] [40 40] {:anchor :bottomleft}
+    [0  20 19 39] [40 40] {:anchor :bottomcenter}
+    [0  20 19 39] [40 40] {:anchor :bottomright}
+    [0   0 19 39] [40 60] {:x 0 :y 0}
+    [1   1 19 39] [40 60] {:x 1 :y 1}
+    [0   0 19 39] [40 60] {:anchor :topleft}
+    [0   0 19 39] [40 60] {:anchor :topcenter}
+    [0   0 19 39] [40 60] {:anchor :topright}
+    [0   0 19 39] [40 60] {:anchor :midleft}
+    [0   0 19 39] [40 60] {:anchor :midcenter}
+    [0   0 19 39] [40 60] {:anchor :midright}
+    [0   0 19 39] [40 60] {:anchor :bottomleft}
+    [0   0 19 39] [40 60] {:anchor :bottomcenter}
+    [0   0 19 39] [40 60] {:anchor :bottomright}))

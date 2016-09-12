@@ -43,4 +43,8 @@
           :original "foo.jpg"} "output/jpg-80/foo.jpg"
          {:output {:format :jpg}
           :size {:size 300}
-          :original "foo.jpg"} "output/jpg/size/300/foo.jpg")))
+          :original "foo.jpg"} "output/jpg/size/300/foo.jpg"
+         {:output {:format :jpg}
+          :watermark {:anchor :topleft :watermark "logo"}
+          :size {:size 10}
+          :original "foo.jpg"} "output/jpg/watermark/topleft-logo/size/10/foo.jpg")))

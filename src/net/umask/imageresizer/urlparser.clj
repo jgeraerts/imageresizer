@@ -43,7 +43,12 @@
                   {:key :output
                    :re-value #"^(jpg)-([0-9]{1,3})$"
                    :keys [:format :quality]}
-                  
+                  {:key :watermark
+                   :re-value #"^(-?[0-9]+)x(-?[0-9]+)-([0-9A-Za-z.]+)$"
+                   :keys [:x :y :watermark]}
+                  {:key :watermark
+                   :re-value #"^((?:top|mid|bottom)(?:left|center|right))-([0-9A-Za-z.]+)$"
+                   :keys [:anchor :watermark]}
                   {:key :rotate
                    :re-value #"^([0-9]+)$"
                    :keys [:angle]}
@@ -64,15 +69,7 @@
                    :keys [:height]}
                   {:key :crop
                    :re-value #"^([0-9]+)x([0-9]+)x([0-9]+)x([0-9]+)$"
-                   :keys [:x :y :width :height]}
-                  {:key :watermark
-                   :re-value #"^(-?[0-9]+)x(-?[0-9]+)-([0-9A-Za-z.]+)$"
-                   :keys [:x :y :watermark]}
-                  {:key :watermark
-                   :re-value #"^((?:top|mid|bottom)(?:left|center|right))-([0-9A-Za-z.]+)$"
-                   :keys [:anchor :watermark]}])
-
-
+                   :keys [:x :y :width :height]}])
 
 (defn option-from-url [uri {option :key valuepattern :re-value valuekeys :keys}]
   (let [[key value rest] (split-uri-path uri 3)]
