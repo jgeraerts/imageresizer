@@ -1,4 +1,4 @@
-(defproject net.umask/imageresizer "0.7.0-SNAPSHOT"
+(defproject net.umask/imageresizer "0.7.1"
   :description  "simple on the fly image resizing server"
   :url "https://github.com/jogeraerts/imageserver"
   :license {:name "Eclipse Public License"
@@ -18,7 +18,7 @@
                  [org.clojure/tools.logging "0.3.1"]
                  [org.imgscalr/imgscalr-lib "4.2"]
                  [org.slf4j/jcl-over-slf4j "1.7.21"]
-                 [ring "1.5.0"]
+                 [ring "1.5.1"]
                  [slingshot "0.12.2"]]
   :exclusions [commons-logging/commons-logging]
   :main net.umask.imageresizer
