@@ -1,7 +1,7 @@
 (ns net.umask.imageresizer.httpsource
   (:require [clojure.string :as string]
             [org.httpkit.client :as http]
-            [clojure.tools.logging :refer [debug]]
+            [clojure.tools.logging :refer [debug info]]
             [net.umask.imageresizer.source :refer [ImageSource]]))
 
 (defn- build-url
@@ -16,10 +16,14 @@
   ImageSource
   (get-image-stream [this name]
     (let [source-url (build-url url name rewrite)
-          {:keys [body error] :as resp} @(http/get source-url)]
+          {:keys [body error status] :as resp} @(http/get source-url)]
       (debug "response for url " source-url " : " resp)
-      (when-not error body))))
-
+      (if error
+        (throw (ex-info "Error occured fetching image data" {:url source-url} error))
+        (if (= 200 status)
+          body
+          (do (info "status returned for url " source-url " " status)
+              nil))))))
 
 (defn create-httpsource
   [url & {:keys [conn-timeout sock-timeout rewrite] :or {conn-timeout 1000
