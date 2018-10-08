@@ -10,7 +10,7 @@
                  [com.twelvemonkeys.imageio/imageio-jpeg "3.2.1"]
                  [com.twelvemonkeys.imageio/imageio-tiff "3.2.1"]
                  [digest "1.4.5"]
-                 [http-kit "2.2.0"]
+                 [http-kit "2.3.0"]
                  [joda-time/joda-time "2.9.4"]
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/test.check "0.9.0"]
